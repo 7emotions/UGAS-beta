@@ -14,8 +14,16 @@ endif()
 target_include_directories(Detector PUBLIC Inc)
 
 find_package(OpenCV REQUIRED)
-
 include_directories(${OpenCV_INCLUDE_DIRS})
+
+set(PROJECT_DIR "/home/alliance/gitrepo/UGAS-beta/")
+
+link_directories("${PROJECT_DIR}/ThridPart/lib/64")
+include_directories("${PROJECT_DIR}/ThridPart/include" "/usr/include/X11" "/usr/include")
+link_libraries("${PROJECT_DIR}/ThridPart/lib/64/libMvCameraControl.so")
+
 target_link_libraries(Detector ${OpenCV_LIBS})
+target_link_libraries(Detector -lX11)
+target_link_libraries(Detector libMvCameraControl.so)
 
 # add_custom_command(TARGET Detector PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resources/ $<TARGET_FILE_DIR:Detector>)

@@ -3,13 +3,17 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "/usr/local/include/opencv4/**",
+                "${workspaceFolder}/Detector/Inc",
+                "/usr/local/include/opencv4"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
-            ]
+            ],
+            "compilerPath": "/usr/bin/g++"
         }
     ],
     "version": 4

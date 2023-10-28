@@ -83,18 +83,11 @@ void test(cv::Mat img, Detector::COLOR_TAG color_tag) {
 			}
 		}
 
-		for (; j >= 0; j--)
-		{
-			auto ml = (lights[i] + lights[j].)/2
-		}
 	}
-
-	//cv::imshow("image", img);
-	//cv::waitKey(0);
 }
 
 int main() {
-
+	
 	std::vector<std::string> files;
 
 	cv::glob(dir, files);

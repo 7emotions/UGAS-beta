@@ -1,2 +1,2 @@
-#include "..\Inc\LightDescriptor.h"
+#include "../Inc/LightDescriptor.h"
 

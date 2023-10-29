@@ -1,2 +1,0 @@
-#include "../Inc/LightDescriptor.h"
-

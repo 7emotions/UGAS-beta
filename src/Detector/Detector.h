@@ -22,7 +22,7 @@ public:
 	~Detector()=default;
 
 	cv::Mat preprocess(cv::Mat img, COLOR_TAG tag);
-	cv::Mat fetchLights(cv::Mat img, COLOR_TAG tag);
+	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag);
 
 private:
 };

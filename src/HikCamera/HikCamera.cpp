@@ -2,6 +2,7 @@
 #include "CameraParams.h"
 #include "MvCameraControl.h"
 #include "MvErrorDefine.h"
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
@@ -67,29 +68,40 @@ bool HikCamera::connectDeivce(){
         return false;
     }
 
+    pData = (unsigned char *)malloc(stParam.nCurValue * sizeof(unsigned char));
+    if (pData == NULL) {
+        return false;
+    }
     return true;
 }
 
 cv::Mat HikCamera::fetchFrame(){
-    MV_FRAME_OUT_INFO_EX stImageInfo = {0};
+	cv::Mat img;
+    MV_FRAME_OUT_INFO_EX stImageInfo;
     memset(&stImageInfo, 0, sizeof(MV_FRAME_OUT_INFO_EX));
 
 
-    pData = (unsigned char *)malloc(stParam.nCurValue * sizeof(unsigned char));
-    if (pData == NULL) {
-        return cv::Mat();
-    }
+    
     unsigned int nDataSize = stParam.nCurValue;
     nRet = MV_CC_GetOneFrameTimeout(handle, pData, nDataSize, &stImageInfo, 1000);
     try {
         if (nRet == MV_OK) {
-            std::cout << "Get One Frame: Width[ " << stImageInfo.nWidth << "], Height[ " << stImageInfo.nHeight << "], nFrameNum[ " << stImageInfo.nFrameNum << "]" << std::endl;
-            pDataForRGB = (unsigned char*)malloc(stImageInfo.nWidth * stImageInfo.nHeight * 4 + 2048);
+            #ifdef LOG_ON
+                std::cout << "Get One Frame: Width[ " << stImageInfo.nWidth << "], Height[ " << stImageInfo.nHeight << "], nFrameNum[ " << stImageInfo.nFrameNum << "]" << std::endl;
+            #endif
+            
+    		if (pDataForRGB) {
+                delete [] pDataForRGB;
+                pDataForRGB=NULL;
+            }
+			// pDataForRGB = (unsigned char*)malloc(stImageInfo.nWidth * stImageInfo.nHeight * 4 + 2048);
+            pDataForRGB = new unsigned char[stImageInfo.nWidth * stImageInfo.nHeight * 4 + 2048];
             if (NULL == pDataForRGB)
             {
                 throw "Null pDataForRGB";
             }
-            MV_CC_PIXEL_CONVERT_PARAM stConvertParam = {0};
+            MV_CC_PIXEL_CONVERT_PARAM stConvertParam;
+            memset(&stConvertParam, 0, sizeof(MV_CC_PIXEL_CONVERT_PARAM));
             stConvertParam.nWidth = stImageInfo.nWidth;
             stConvertParam.nHeight = stImageInfo.nHeight;
             stConvertParam.pSrcData = pData;
@@ -102,6 +114,9 @@ cv::Mat HikCamera::fetchFrame(){
             if (MV_OK != nRet){
                 throw "ConvertPixelType fail";
             }
+            // 
+			img = cv::Mat(stImageInfo.nHeight, stImageInfo.nWidth, CV_8UC3, pDataForRGB);
+    		cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
         }else{
             std::cerr << "Get One Frame fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
         }
@@ -110,7 +125,5 @@ cv::Mat HikCamera::fetchFrame(){
         return cv::Mat();
     }
 
-    cv::Mat img(stImageInfo.nHeight, stImageInfo.nWidth, CV_8UC3, pDataForRGB);
-    cv::cvtColor(img, img, cv::COLOR_BGR2RGB);
     return img;
 }

@@ -30,10 +30,6 @@ public:
             free(pData);
             pData = NULL;
         }
-        if (pDataForRGB) {
-            free(pDataForRGB);
-            pDataForRGB=NULL;
-        }
     }
 
     bool isUSEDevice(MV_CC_DEVICE_INFO* pstMVCCDI);

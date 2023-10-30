@@ -1,10 +1,20 @@
 ﻿#include "Detector.h"
+#include "Identify/NumberIdentify.h"
 
+#include <complex>
 #include <cstddef>
+#include <exception>
 #include <iostream>
 #include <algorithm>
+#include <string>
+#include <tuple>
+#include <vector>
 
+#include <opencv2/core.hpp>
+#include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
 cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
@@ -13,7 +23,7 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 	cv::Mat binary, gaussian, dilate;
 	cv::split(img, channels);
 	cv::threshold(channels[tagToDetect == BLUE ? 0 : 2], binary, 220, 255, 0);
-	std::cout<<binary.size()<<std::endl;
+	
 	GaussianBlur(binary, gaussian, cv::Size(5, 5), 0);
 
 	auto element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
@@ -24,19 +34,22 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 }
 
 
-cv::Mat Detector::fetchLights(cv::Mat img, COLOR_TAG color_tag) {
+cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
+
 	Detector myDetector;
 	std::vector<LightDescriptor> lights;
 
 	std::vector<std::vector<cv::Point>> contours;
 	std::vector<cv::Vec4i> hierarchy;
 
+	NumberIdentify identifier("../model/NINNModel.onnx");
 
 	cv::findContours(myDetector.preprocess(img, color_tag), contours,
 		hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_NONE,
 		cv::Point());
 
 	std::vector<cv::RotatedRect> boundRect(contours.size());
+
 
 	for (size_t i = 0; i < contours.size(); i++) {
 		auto area = contourArea(contours[i]);
@@ -103,6 +116,7 @@ cv::Mat Detector::fetchLights(cv::Mat img, COLOR_TAG color_tag) {
 			cv::Point2f center((lights[i].center.x+lights[j].center.x)/2,
 					(lights[i].center.y+lights[j].center.y)/2);
 			auto angle = (lights[i].angle + lights[j].angle)/2;
+			
 			cv::RotatedRect rect(center, cv::Size(distance, distance), angle);
 			std::vector<cv::Point2f> points;
 			rect.points(points);
@@ -110,24 +124,23 @@ cv::Mat Detector::fetchLights(cv::Mat img, COLOR_TAG color_tag) {
 			cv::Mat rot = getRotationMatrix2D(center, angle, 1);
 			cv::Mat rot_img;
 			cv::warpAffine(img, rot_img, rot, img.size());
-			cv::Mat roi = rot_img(cv::Rect(center.x - distance / 2, center.y - distance / 2, distance, distance));
-			cv::Mat roi_gray;
-			cv::cvtColor(roi, roi_gray, cv::COLOR_BGR2GRAY);
-			cv::Mat roi_bin;
-			cv::threshold(roi_gray, roi_bin, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+			auto k = 1.8;
+			cv::Mat roi;
+			try {
+				roi = rot_img(cv::Rect(center.x - ml * k / 2, center.y - ml * k / 2, ml * k, ml * k));
+				
+				try {
+					std::tuple<int, double> res = identifier.Identify(roi);
+					std::cout << "code:" << std::get<0>(res) << std::endl;
+					std::cout<<"confidence:"<<std::get<1>(res)<<std::endl;
+				} catch (std::exception &err) {
+					std::cout << err.what() << std::endl;
+				}
 
-			cv::imshow("roi", roi_bin);
-			cv::waitKey();
-
-			//TODO: Here 
-
-#ifdef DEBUG_LOG
-			for(size_t k=0;k<points.size();k++){
-				line(img, points[k], points[(k+1)%points.size()], 
-				color_tag == Detector::COLOR_TAG::BLUE? cv::Scalar(0, 0, 255):cv::Scalar(255,0,0)
-				, 5);
+			} catch (cv::Exception &e) {
+				std::cout << e.what() << std::endl;
 			}
-#endif
+
 		}
 	}
 	return img;

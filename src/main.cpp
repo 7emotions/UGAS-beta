@@ -19,13 +19,16 @@ int main(){
         return 1;
     }
 
+    std::cout << "Connected to camera" << std::endl;
+
     cv::Mat img;
     do {
         img = hikCamera.fetchFrame();
         if (img.empty()) {
             break;
         }
-        img = detector.fetchLights(img, Detector::COLOR_TAG::RED);
+        img = detector.DetectLights(img, Detector::COLOR_TAG::RED);
+
         cv::imshow("Detected Lights", img);
         if (cv::waitKey(100)==27) {
             break;

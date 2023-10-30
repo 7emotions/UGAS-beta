@@ -103,15 +103,31 @@ cv::Mat Detector::fetchLights(cv::Mat img, COLOR_TAG color_tag) {
 			cv::Point2f center((lights[i].center.x+lights[j].center.x)/2,
 					(lights[i].center.y+lights[j].center.y)/2);
 			auto angle = (lights[i].angle + lights[j].angle)/2;
-			cv::RotatedRect rect(center, cv::Size(distance, ml), angle);
+			cv::RotatedRect rect(center, cv::Size(distance, distance), angle);
 			std::vector<cv::Point2f> points;
 			rect.points(points);
 
+			cv::Mat rot = getRotationMatrix2D(center, angle, 1);
+			cv::Mat rot_img;
+			cv::warpAffine(img, rot_img, rot, img.size());
+			cv::Mat roi = rot_img(cv::Rect(center.x - distance / 2, center.y - distance / 2, distance, distance));
+			cv::Mat roi_gray;
+			cv::cvtColor(roi, roi_gray, cv::COLOR_BGR2GRAY);
+			cv::Mat roi_bin;
+			cv::threshold(roi_gray, roi_bin, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+			cv::imshow("roi", roi_bin);
+			cv::waitKey();
+
+			//TODO: Here 
+
+#ifdef DEBUG_LOG
 			for(size_t k=0;k<points.size();k++){
 				line(img, points[k], points[(k+1)%points.size()], 
 				color_tag == Detector::COLOR_TAG::BLUE? cv::Scalar(0, 0, 255):cv::Scalar(255,0,0)
 				, 5);
 			}
+#endif
 		}
 	}
 	return img;

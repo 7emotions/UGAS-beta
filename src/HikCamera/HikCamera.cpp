@@ -72,6 +72,7 @@ bool HikCamera::connectDeivce(){
     if (pData == NULL) {
         return false;
     }
+    isConnected = true;
     return true;
 }
 

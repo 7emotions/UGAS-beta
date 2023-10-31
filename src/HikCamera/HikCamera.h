@@ -15,6 +15,9 @@ class HikCamera{
 public:
     HikCamera() = default;
     ~HikCamera(){
+        if (!isConnected) {
+            return;
+        }
         nRet = MV_CC_StopGrabbing(handle);
         if (nRet != MV_OK) {
             std::cout << "Stop Grabbing failed" << std::endl;
@@ -39,6 +42,7 @@ public:
 private:
     int nRet = MV_OK;
     void *handle=NULL;
+    bool isConnected = false;
     MVCC_INTVALUE stParam;
     unsigned char *pData = NULL;
     unsigned char *pDataForRGB = NULL;

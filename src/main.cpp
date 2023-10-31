@@ -21,6 +21,8 @@ int main(){
 
     std::cout << "Connected to camera" << std::endl;
 
+    
+
     cv::Mat img;
     do {
         img = hikCamera.fetchFrame();

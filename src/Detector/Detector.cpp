@@ -17,6 +17,10 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
+inline double EuDis(cv::Point2f a, cv::Point2f b) {
+	return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
+}
+
 cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 
 	cv::Mat channels[3];
@@ -29,7 +33,7 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 	auto element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 	cv::dilate(gaussian, dilate, element);
 
-	return dilate;
+	return dilate;std::vector<cv::Point2f> points;
 
 }
 
@@ -96,8 +100,7 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 			if (rdfm > 0.5){
 				continue;
 			}
-			auto distance = 
-				sqrt(pow(lights[i].center.x - lights[j].center.x, 2) + pow(lights[i].center.y - lights[j].center.y, 2));
+			auto distance = EuDis(lights[i].center, lights[j].center);
 			auto rdsm = distance / ml;
 			if (rdsm > 3.5 || rdsm < 0.5){
 				continue;
@@ -121,22 +124,33 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 			std::vector<cv::Point2f> points;
 			rect.points(points);
 
-			cv::Mat rot = getRotationMatrix2D(center, angle, 1);
-			cv::Mat rot_img;
-			cv::warpAffine(img, rot_img, rot, img.size());
-			auto k = 1.8;
+			std::sort(points.begin(), points.end(), [](const cv::Point2f &a, const cv::Point2f &b){
+				return a.y < b.y || a.x < b.x;
+			});
+
+			auto leftHeight = EuDis(points[0], points[1]);
+			auto rightHeight = EuDis(points[2], points[3]);
+			auto maxHeight = std::max(leftHeight, rightHeight);
+
+			auto upWidth = EuDis(points[1], points[2]);
+			auto downWidth = EuDis(points[0], points[3]);
+			auto maxWidth = std::max(upWidth, downWidth);
+
+			cv::Point2f srcAffinePts[4] = {cv::Point2f(points[0]),cv::Point2f(points[1]),cv::Point2f(points[3]),cv::Point2f(points[2])};
+			cv::Point2f dstAffinePts[4] = {cv::Point2f(0,0),cv::Point2f(maxWidth,0),cv::Point2f(maxWidth,maxHeight),cv::Point2f(0,maxHeight)};
+
+			auto affineMat = cv::getPerspectiveTransform(srcAffinePts, dstAffinePts);
+
 			cv::Mat roi;
 			try {
-				roi = rot_img(cv::Rect(center.x - ml * k / 2, center.y - ml * k / 2, ml * k, ml * k));
-				
-				try {
-					std::tuple<int, double> res = identifier.Identify(roi);
-					std::cout << "code:" << std::get<0>(res) << std::endl;
-					std::cout<<"confidence:"<<std::get<1>(res)<<std::endl;
-				} catch (std::exception &err) {
-					std::cout << err.what() << std::endl;
-				}
+				cv::warpPerspective(img, roi, affineMat, cv::Point(maxWidth, maxHeight));	
+				std::tuple<int,double> res = identifier.Identify(roi);
+				auto code = std::get<0>(res);
+				//auto confidence = std::get<1>(res);
 
+				cv::putText(img, std::to_string(code), center, cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0),
+							2, cv::LINE_AA);
+				
 			} catch (cv::Exception &e) {
 				std::cout << e.what() << std::endl;
 			}

@@ -26,16 +26,7 @@ std::tuple<int,double> NumberIdentify::Identify(cv::Mat &img)
 
 cv::Mat NumberIdentify::_BlobImage(cv::Mat &img)
 {
-    cv::resize(img, img, cv::Size(36, 36));
-	// cv::Mat roi_gray;
-				// cv::cvtColor(roi, roi_gray, cv::COLOR_BGR2GRAY);
-
-				// cv::Mat roi_blur;
-
-				// cv::GaussianBlur(roi_gray, roi_blur, cv::Size(5, 5), 0, 0);
-				// cv::Mat roi_threshold;
-
-				// cv::threshold(roi_blur, roi_threshold, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    cv::resize(img, img, cv::Size(36, 36));\
 	cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 	cv::GaussianBlur(img, img, cv::Size(5,5), 0,0);
 	cv::threshold(img, img, 0, 255, cv::THRESH_BINARY|cv::THRESH_OTSU);

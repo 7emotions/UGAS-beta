@@ -127,23 +127,31 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 			std::sort(points.begin(), points.end(), [](const cv::Point2f &a, const cv::Point2f &b){
 				return a.y < b.y || a.x < b.x;
 			});
+			
+			enum {
+				TL,
+				TR,
+				BL,
+				BR,
+			};
 
-			auto leftHeight = EuDis(points[0], points[1]);
-			auto rightHeight = EuDis(points[2], points[3]);
+			auto leftHeight = EuDis(points[TL], points[BL]);
+			auto rightHeight = EuDis(points[TR], points[BR]);
 			auto maxHeight = std::max(leftHeight, rightHeight);
 
-			auto upWidth = EuDis(points[1], points[2]);
-			auto downWidth = EuDis(points[0], points[3]);
+			auto upWidth = EuDis(points[TL], points[TR]);
+			auto downWidth = EuDis(points[BL], points[BR]);
 			auto maxWidth = std::max(upWidth, downWidth);
 
-			cv::Point2f srcAffinePts[4] = {cv::Point2f(points[0]),cv::Point2f(points[1]),cv::Point2f(points[3]),cv::Point2f(points[2])};
+			cv::Point2f srcAffinePts[4] = {cv::Point2f(points[TL]),cv::Point2f(points[TR]),cv::Point2f(points[BR]),cv::Point2f(points[BL])};
 			cv::Point2f dstAffinePts[4] = {cv::Point2f(0,0),cv::Point2f(maxWidth,0),cv::Point2f(maxWidth,maxHeight),cv::Point2f(0,maxHeight)};
 
 			auto affineMat = cv::getPerspectiveTransform(srcAffinePts, dstAffinePts);
 
 			cv::Mat roi;
 			try {
-				cv::warpPerspective(img, roi, affineMat, cv::Point(maxWidth, maxHeight));	
+				cv::warpPerspective(img, roi, affineMat, cv::Point(maxWidth, maxHeight));
+					
 				std::tuple<int,double> res = identifier.Identify(roi);
 				auto code = std::get<0>(res);
 				//auto confidence = std::get<1>(res);

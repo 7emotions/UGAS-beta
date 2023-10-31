@@ -48,7 +48,7 @@ bool HikCamera::connectDeivce(){
         std::cerr << "Open Device fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
         return false;
     }
-
+    
     nRet = MV_CC_SetEnumValue(handle, "TriggerMode", 0);
     if (nRet != MV_OK) {
         std::cerr << "Set TriggerMode fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
@@ -81,8 +81,6 @@ cv::Mat HikCamera::fetchFrame(){
     MV_FRAME_OUT_INFO_EX stImageInfo;
     memset(&stImageInfo, 0, sizeof(MV_FRAME_OUT_INFO_EX));
 
-
-    
     unsigned int nDataSize = stParam.nCurValue;
     nRet = MV_CC_GetOneFrameTimeout(handle, pData, nDataSize, &stImageInfo, 1000);
     try {

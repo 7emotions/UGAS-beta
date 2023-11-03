@@ -120,9 +120,13 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 					(lights[i].center.y+lights[j].center.y)/2);
 			auto angle = (lights[i].angle + lights[j].angle)/2;
 			
-			cv::RotatedRect rect(center, cv::Size(distance, distance), angle);
+			cv::RotatedRect rect(center, cv::Size(distance, ml*125/56), angle);
+			std::cout<<angle<<std::endl;
+			cv::RotatedRect pnpRect(center, cv::Size(distance,ml), angle);
 			std::vector<cv::Point2f> points;
+			std::vector<cv::Point2f> pnpPs;
 			rect.points(points);
+			pnpRect.points(pnpPs);
 
 			std::sort(points.begin(), points.end(), [](const cv::Point2f &a, const cv::Point2f &b){
 				return a.y < b.y || a.x < b.x;
@@ -153,11 +157,22 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 				cv::warpPerspective(img, roi, affineMat, cv::Point(maxWidth, maxHeight));
 					
 				std::tuple<int,double> res = identifier.Identify(roi);
-				auto code = std::get<0>(res);
-				//auto confidence = std::get<1>(res);
+				auto code = (int)std::get<0>(res);
+				//auto confidence = (double)std::get<1>(res);
+
+				if (code == 0) {
+					//continue;
+				}
 
 				cv::putText(img, std::to_string(code), center, cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0),
 							2, cv::LINE_AA);
+				//std::cout<<confidence<<std::endl;
+
+				
+				cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));
+				cv::line(img, points[TR], points[BR], cv::Scalar(0, 255, 0));
+				cv::line(img, points[BR], points[BL], cv::Scalar(0, 255, 0));
+				cv::line(img, points[BL], points[TL], cv::Scalar(0, 255, 0));
 				
 			} catch (cv::Exception &e) {
 				std::cout << e.what() << std::endl;

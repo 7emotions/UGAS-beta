@@ -26,7 +26,7 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 	cv::Mat channels[3];
 	cv::Mat binary, gaussian, dilate;
 	cv::split(img, channels);
-	cv::threshold(channels[tagToDetect == BLUE ? 0 : 2], binary, 220, 255, 0);
+	cv::threshold(channels[tagToDetect == BLUE ? 0 : 2]-channels[tagToDetect == BLUE ? 2 : 0], binary, 125, 255, cv::THRESH_BINARY);
 	
 	GaussianBlur(binary, gaussian, cv::Size(5, 5), 0);
 
@@ -48,7 +48,10 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 
 	NumberIdentify identifier("../model/NINNModel.onnx");
 
-	cv::findContours(myDetector.preprocess(img, color_tag), contours,
+	cv::Mat pre = myDetector.preprocess(img, color_tag);
+
+	//cv::imshow("pre",pre);
+	cv::findContours(pre, contours,
 		hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_NONE,
 		cv::Point());
 
@@ -105,23 +108,13 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 			if (rdsm > 3.5 || rdsm < 0.5){
 				continue;
 			}
-			auto dx = abs(lights[i].center.x - lights[j].center.x);
-			auto dy = abs(lights[i].center.y - lights[j].center.y);
-			auto dxr = dx / ml;
-			auto dyr = dy / ml;
-			if(dxr > 2 || dxr<0.6){
-				continue;
-			}
-			if(dyr>1.2){
-				continue;
-			}
 
 			cv::Point2f center((lights[i].center.x+lights[j].center.x)/2,
 					(lights[i].center.y+lights[j].center.y)/2);
 			auto angle = (lights[i].angle + lights[j].angle)/2;
 			
 			cv::RotatedRect rect(center, cv::Size(distance, ml*125/56), angle);
-			std::cout<<angle<<std::endl;
+			//std::cout<<angle<<std::endl;
 			cv::RotatedRect pnpRect(center, cv::Size(distance,ml), angle);
 			std::vector<cv::Point2f> points;
 			std::vector<cv::Point2f> pnpPs;
@@ -155,18 +148,18 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 			cv::Mat roi;
 			try {
 				cv::warpPerspective(img, roi, affineMat, cv::Point(maxWidth, maxHeight));
-					
+				cv::imshow("perspective", roi);
 				std::tuple<int,double> res = identifier.Identify(roi);
 				auto code = (int)std::get<0>(res);
-				//auto confidence = (double)std::get<1>(res);
+				auto confidence = (double)std::get<1>(res);
 
-				if (code == 0) {
-					//continue;
+				if (code == 0 || confidence<0.5) {
+					continue;
 				}
 
 				cv::putText(img, std::to_string(code), center, cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0),
 							2, cv::LINE_AA);
-				//std::cout<<confidence<<std::endl;
+				std::cout<<"Code:"<<code<<"\t"<<"Confidence" << confidence<<std::endl;
 
 				
 				cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));

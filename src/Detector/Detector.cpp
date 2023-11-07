@@ -1,13 +1,18 @@
 ﻿#include "Detector.h"
 #include "Identify/NumberIdentify.h"
+#include "LightDescriptor/LightDescriptor.h"
 
+#include <algorithm>
+#include <cmath>
 #include <complex>
 #include <cstddef>
 #include <exception>
 #include <iostream>
-#include <algorithm>
+#include <math.h>
 #include <string>
+#include <system_error>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include <opencv2/core.hpp>
@@ -17,163 +22,225 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
+inline double crossProduct(cv::Point2f a, cv::Point2f b){
+	return a.x*b.y - a.y*b.x;
+}
+
 inline double EuDis(cv::Point2f a, cv::Point2f b) {
-	return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
+  return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
+}
+
+
+
+void sortPts(std::vector<cv::Point2f> &points) {
+	std::sort(points.begin(), points.end(),
+            [](const cv::Point2f &a, const cv::Point2f &b) { return a.x+a.y > b.x+b.y; });
+	auto tl = points[0];
+	cv::Point2f bl, br, tr;
+	auto a = points[1] - tl;
+	auto b = points[2] - tl;
+	auto c = points[3] - tl;
+
+	auto e1 = crossProduct(a, b) > 0;
+	auto e2 = crossProduct(a, c) > 0;
+	auto e3 = crossProduct(b, c) > 0;
+
+	if (e1 && e2) {
+		bl = points[1];
+
+		if (e3) {
+			br = points[2];
+			tr = points[3];
+		}else {
+			tr = points[2];
+			br = points[3];
+		}
+	}
+	else if (!e1 && !e2) {
+		tr = points[1];
+
+		if (e3) {
+			br = points[3];
+			bl = points[2];
+		}else {
+			bl = points[3];
+			br = points[2];
+		}
+	}else {
+		br = points[1];
+
+		if (e3) {
+			bl = points[3];
+			tr = points[2];
+		}else {
+			tr = points[3];
+			bl = points[2];
+		}
+	}
+
+	points.clear();
+	points.push_back(tl);
+	points.push_back(bl);
+	points.push_back(tr);
+	points.push_back(br);
+}
+enum { BR, BL, TR, TL };
+
+void perspective(cv::Mat &img, std::vector<cv::Point2f> &points, cv::Mat &roi) {
+  auto leftHeight = EuDis(points[TL], points[BL]);
+  auto rightHeight = EuDis(points[TR], points[BR]);
+  auto maxHeight = std::max(leftHeight, rightHeight);
+
+  auto upWidth = EuDis(points[TL], points[TR]);
+  auto downWidth = EuDis(points[BL], points[BR]);
+  auto maxWidth = std::max(upWidth, downWidth);
+
+  cv::Point2f srcAffinePts[4] = {
+      cv::Point2f(points[TL]), cv::Point2f(points[TR]), cv::Point2f(points[BR]),
+      cv::Point2f(points[BL])};
+  cv::Point2f dstAffinePts[4] = {cv::Point2f(0, 0), cv::Point2f(maxWidth, 0),
+                                 cv::Point2f(maxWidth, maxHeight),
+                                 cv::Point2f(0, maxHeight)};
+
+  auto affineMat = cv::getPerspectiveTransform(srcAffinePts, dstAffinePts);
+  cv::warpPerspective(img, roi, affineMat, cv::Point(maxWidth, maxHeight));
 }
 
 cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 
-	cv::Mat channels[3];
-	cv::Mat binary, gaussian, dilate;
-	cv::split(img, channels);
-	cv::threshold(channels[tagToDetect == BLUE ? 0 : 2]-channels[tagToDetect == BLUE ? 2 : 0], binary, 125, 255, cv::THRESH_BINARY);
-	
-	GaussianBlur(binary, gaussian, cv::Size(5, 5), 0);
+  cv::Mat channels[3];
+  cv::Mat binary, gaussian, dilate;
+  cv::split(img, channels);
+  cv::threshold(channels[tagToDetect == BLUE ? 0 : 2] -
+                    channels[tagToDetect == BLUE ? 2 : 0],
+                binary, 125, 255, cv::THRESH_BINARY);
 
-	auto element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
-	cv::dilate(gaussian, dilate, element);
+  GaussianBlur(binary, gaussian, cv::Size(5, 5), 0);
 
-	return dilate;std::vector<cv::Point2f> points;
+  auto element = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+  cv::dilate(gaussian, dilate, element);
 
+  return dilate;
+  std::vector<cv::Point2f> points;
 }
 
 
 cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 
-	Detector myDetector;
-	std::vector<LightDescriptor> lights;
+  Detector myDetector;
+  std::vector<LightDescriptor> lights;
 
-	std::vector<std::vector<cv::Point>> contours;
-	std::vector<cv::Vec4i> hierarchy;
+  std::vector<std::vector<cv::Point>> contours;
+  std::vector<cv::Vec4i> hierarchy;
 
-	NumberIdentify identifier("../model/NINNModel.onnx");
+  std::vector<cv::Point2f> centers;
 
-	cv::Mat pre = myDetector.preprocess(img, color_tag);
+  NumberIdentify identifier("../model/NINNModel.onnx");
 
-	//cv::imshow("pre",pre);
-	cv::findContours(pre, contours,
-		hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_NONE,
-		cv::Point());
+  cv::Mat pre = myDetector.preprocess(img, color_tag);
 
-	std::vector<cv::RotatedRect> boundRect(contours.size());
+  // cv::imshow("pre",pre);
+  cv::findContours(pre, contours, hierarchy, cv::RETR_TREE,
+                   cv::CHAIN_APPROX_NONE, cv::Point());
 
+  std::vector<cv::RotatedRect> boundRect(contours.size());
 
-	for (size_t i = 0; i < contours.size(); i++) {
-		auto area = contourArea(contours[i]);
-		if (area < minArea || contours[i].size() <= minContoursSize)
-		{
-			continue;
-		}
+  for (size_t i = 0; i < contours.size(); i++) {
+    auto area = contourArea(contours[i]);
+    if (area < minArea || contours[i].size() <= minContoursSize) {
+      continue;
+    }
 
-		auto rec = fitEllipse(contours[i]);
+    auto rec = fitEllipse(contours[i]);
 
-		if (rec.size.width / rec.size.height > lightLengthRatio)
-		{
-			continue;
-		}
+    if (rec.size.width / rec.size.height > lightLengthRatio) {
+      continue;
+    }
 
-		rec.size.height *= 1.2;
-		rec.size.width *= 1.2;
+    rec.size.height *= 1.2;
+    rec.size.width *= 1.2;
 
-		lights.push_back(rec);
-	}
+    lights.push_back(rec);
+  }
 
-	sort(lights.begin(), lights.end(), [&](const LightDescriptor& a, const LightDescriptor& b) {
-		return a.angle == b.angle ? a.angle < b.angle : a.angle > b.angle;
-		});
-
-	for (size_t i = 0; i < lights.size(); i++)
-	{
-		int j = i + 1;
-		for (; (size_t)j < lights.size(); j++)
-		{
-			if (abs(lights[i].angle - lights[j].angle) > minAngleDiff)
-			{
+  for (size_t i=0; i<lights.size(); i++) {
+	for (size_t j=i+1; j<lights.size(); j++) {
+		bool loopFlag = true;
+		auto center = (lights[i].center + lights[j].center)/2;
+		for (size_t i=0; i<centers.size(); i++) {
+			if (EuDis(center, centers[i])<5) {
+				loopFlag = false;
 				break;
 			}
 		}
-
-		for(;j>=0;j--){
-			auto ml = (lights[i].center.x - lights[j].center.x) / 2;
-			auto rpd = abs(lights[i].length-lights[j].length)/std::max(lights[i].length,lights[j].length);
-			if(rpd > 0.8){
-				continue;
-			}
-			auto rdfm = abs(lights[i].length - ml) / ml;
-			if (rdfm > 0.5){
-				continue;
-			}
-			auto distance = EuDis(lights[i].center, lights[j].center);
-			auto rdsm = distance / ml;
-			if (rdsm > 3.5 || rdsm < 0.5){
-				continue;
-			}
-
-			cv::Point2f center((lights[i].center.x+lights[j].center.x)/2,
-					(lights[i].center.y+lights[j].center.y)/2);
-			auto angle = (lights[i].angle + lights[j].angle)/2;
-			
-			cv::RotatedRect rect(center, cv::Size(distance, ml*125/56), angle);
-			//std::cout<<angle<<std::endl;
-			cv::RotatedRect pnpRect(center, cv::Size(distance,ml), angle);
-			std::vector<cv::Point2f> points;
-			std::vector<cv::Point2f> pnpPs;
-			rect.points(points);
-			pnpRect.points(pnpPs);
-
-			std::sort(points.begin(), points.end(), [](const cv::Point2f &a, const cv::Point2f &b){
-				return a.y < b.y || a.x < b.x;
-			});
-			
-			enum {
-				TL,
-				TR,
-				BL,
-				BR,
-			};
-
-			auto leftHeight = EuDis(points[TL], points[BL]);
-			auto rightHeight = EuDis(points[TR], points[BR]);
-			auto maxHeight = std::max(leftHeight, rightHeight);
-
-			auto upWidth = EuDis(points[TL], points[TR]);
-			auto downWidth = EuDis(points[BL], points[BR]);
-			auto maxWidth = std::max(upWidth, downWidth);
-
-			cv::Point2f srcAffinePts[4] = {cv::Point2f(points[TL]),cv::Point2f(points[TR]),cv::Point2f(points[BR]),cv::Point2f(points[BL])};
-			cv::Point2f dstAffinePts[4] = {cv::Point2f(0,0),cv::Point2f(maxWidth,0),cv::Point2f(maxWidth,maxHeight),cv::Point2f(0,maxHeight)};
-
-			auto affineMat = cv::getPerspectiveTransform(srcAffinePts, dstAffinePts);
-
-			cv::Mat roi;
-			try {
-				cv::warpPerspective(img, roi, affineMat, cv::Point(maxWidth, maxHeight));
-				cv::imshow("perspective", roi);
-				std::tuple<int,double> res = identifier.Identify(roi);
-				auto code = (int)std::get<0>(res);
-				auto confidence = (double)std::get<1>(res);
-
-				if (code == 0 || confidence<0.5) {
-					continue;
-				}
-
-				cv::putText(img, std::to_string(code), center, cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0,255,0),
-							2, cv::LINE_AA);
-				std::cout<<"Code:"<<code<<"\t"<<"Confidence" << confidence<<std::endl;
-
-				
-				cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));
-				cv::line(img, points[TR], points[BR], cv::Scalar(0, 255, 0));
-				cv::line(img, points[BR], points[BL], cv::Scalar(0, 255, 0));
-				cv::line(img, points[BL], points[TL], cv::Scalar(0, 255, 0));
-				
-			} catch (cv::Exception &e) {
-				std::cout << e.what() << std::endl;
-			}
-
+		if (!loopFlag) {
+			continue;
 		}
+		if (asin(abs(crossProduct(lights[i].v, lights[j].v))>minAngleDiff) ) {
+			continue;
+		}
+
+		auto ml = (lights[i].length+lights[j].length)/2;
+
+		auto rpd = abs(lights[i].length-lights[j].length)/std::max(lights[i].length, lights[j].length);
+		
+		if (rpd>0.8) {
+			continue;
+		}
+		
+		auto rdfm = abs(lights[i].length - lights[j].length)/ml;
+
+		if (rdfm>0.5) {
+			continue;
+		}
+
+		auto distance = EuDis(lights[i].center, lights[j].center);
+		auto rdsm = distance / ml;
+
+		if (rdsm > 3.5 || rdsm < 0.5) {
+			continue;
+		}
+
+		std::vector<cv::Point2f> points;
+		lights[i].extend(points, ml,
+		lights[i].center.x < lights[j].center.x?LightDescriptor::LEFT:LightDescriptor::RIGHT);
+		lights[j].extend(points, ml,
+		lights[i].center.x < lights[j].center.x?LightDescriptor::RIGHT:LightDescriptor::LEFT);
+
+		sortPts(points);
+
+		// cv::Mat frame=img.clone();
+		// cv::putText(frame, "TL", points[TL], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		// cv::putText(frame, "TR", points[TR], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		// cv::putText(frame, "BL", points[BL], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		// cv::putText(frame, "BR", points[BR], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		
+		// cv::imshow("frame", frame);
+
+		cv::Mat roi;
+		perspective(img, points, roi);
+		
+		auto res = identifier.Identify(roi);
+		auto code = std::get<0>(res);
+		auto confidence = std::get<1>(res);
+
+		if (code == 0 || confidence < 0.6) {
+			points.clear();
+			continue;
+		}
+
+		cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));
+		cv::line(img, points[TR], points[BR], cv::Scalar(0, 255, 0));
+		cv::line(img, points[BR], points[BL], cv::Scalar(0, 255,0));
+		cv::line(img, points[BL], points[TL], cv::Scalar(0, 255, 0));
+
+		centers.push_back(center);
+
+		cv::putText(img, "Code: " + std::to_string(code), center, cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0));
+		std::cout << "Code: " << code << "\tConfidence: " << confidence << std::endl;
+		points.clear();
 	}
-	return img;
+  }
+  centers.clear();
+  return img;
 }
-
-

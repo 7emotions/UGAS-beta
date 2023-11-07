@@ -31,7 +31,7 @@ int main(){
         img = detector.DetectLights(img, Detector::COLOR_TAG::BLUE);
 
         cv::imshow("Detected Lights", img);
-        if (cv::waitKey(100)==27) {
+        if (cv::waitKey(10)==27) {
             break;
         }
     }while (true);

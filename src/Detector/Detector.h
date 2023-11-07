@@ -11,7 +11,7 @@
 const int minArea = 5;
 const int minContoursSize = 1;
 const double lightLengthRatio = 4.0;
-const double minAngleDiff = 10.0;
+const double minAngleDiff = 15.0;
 const double minLengthDiffRatio = 0.8;
 
 class Detector {

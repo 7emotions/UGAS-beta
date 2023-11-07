@@ -1,19 +1,51 @@
 #pragma once
+#include <opencv2/core/base.hpp>
+#include <opencv2/core/types.hpp>
 #include <opencv2/opencv.hpp>
+#include <vector>
 
 class LightDescriptor
 {
 public:
-	float width, length, angle, area;
 	cv::Point2f center;
+	cv::Point2f pts[4];
+	cv::Point2f v;
+	cv::Point2f t;
+	double length;
 
-	LightDescriptor(const cv::RotatedRect& light) {
-		width = light.size.width;
-		length = light.size.height;
+	enum{
+		LEFT,
+		RIGHT
+	};
 
-		center = light.center;
-		angle = light.angle;
-		area = light.size.area();
+	LightDescriptor(const cv::RotatedRect& light):center(light.center) {
+		light.points(pts);
+		if (light.size.height > light.size.width) {
+			v = pts[1] - pts[0];
+			v /= light.size.height;
+
+			t = pts[3] - pts[0];
+			t /= 2;
+
+			length = light.size.height;
+		}else {
+			v = pts[3] - pts[0];
+			v /= light.size.width;
+
+			t = pts[0] - pts[1];
+			t /= 2;
+
+			length = light.size.width;
+		}
 	}
 
+	void extend(std::vector<cv::Point2f> &points, double ml,bool flag=LEFT){
+		if (flag) {
+			points.push_back(center+t+ml*120/56/2*v); //TL
+			points.push_back(center+t-ml*120/56/2*v); //BL
+		}else {
+			points.push_back(center-t+ml*120/56/2*v); //TR
+			points.push_back(center-t-ml*120/56/2*v); //BR
+		}
+	}
 };

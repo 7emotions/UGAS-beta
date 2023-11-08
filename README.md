@@ -8,7 +8,7 @@ The goal of UGAS-beta is to help to automatically aim.
 
 ### HikCamera SDK
 
-1. Visit ![MVS](https://www.hikrobotics.com/cn/machinevision/service/download?module=0) to download the HikVision MVS.
+1. Visit [MVS](https://www.hikrobotics.com/cn/machinevision/service/download?module=0) to download the HikVision MVS.
 2. Then unzip it and cd into the folder.
 3. Run the command blow to install the MVS(x86_64 for PC).
 	`sudo dpkg -i ***.deb`
@@ -19,8 +19,7 @@ PS: Adding its lib to PATH is NOT recommended, for it may cause some conflicts w
 
 ### OpenCV
 
-1. Visit ![OpenCV](https://opencv.org/releases/) to download the latest version of OpenCV.
-
+1. Visit [OpenCV](https://opencv.org/releases/) to download the latest version of OpenCV.
 2. Then unzip it and cd into the folder.
 3. Run the command blow to install OpenCV.
 ```

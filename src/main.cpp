@@ -13,6 +13,13 @@ int main(){
 
     Detector detector;
     HikCamera hikCamera;
+	int tag;
+	std::cout<<"Color to detect(0 for B, 1 for R):";
+	std::cin >> tag;
+	if (tag > 1) {
+		std::cout << "Invalid input" << std::endl;
+		return 1;
+	}
 
     if (!hikCamera.connectDeivce()) {
         std::cerr << "Failed to connect to camera" << std::endl;
@@ -28,7 +35,7 @@ int main(){
         if (img.empty()) {
             break;
         }
-        img = detector.DetectLights(img, Detector::COLOR_TAG::BLUE);
+        img = detector.DetectLights(img, (Detector::COLOR_TAG)tag);
 
         cv::imshow("Detected Lights", img);
         if (cv::waitKey(10)==27) {

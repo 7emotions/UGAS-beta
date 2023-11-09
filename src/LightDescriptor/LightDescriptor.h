@@ -39,6 +39,16 @@ public:
 		}
 	}
 
+	void pnpPts(std::vector<cv::Point2f> &pnpPts, bool flag=LEFT){
+		if (flag) {
+			pnpPts.push_back(center+t+length/2*v);
+			pnpPts.push_back(center+t-length/2*v);
+		}else {
+			pnpPts.push_back(center-t+length/2*v);
+			pnpPts.push_back(center-t-length/2*v);
+		}
+	}
+
 	void extend(std::vector<cv::Point2f> &points, double ml,bool flag=LEFT){
 		if (flag) {
 			points.push_back(center+t+ml*120/56/2*v); //TL

@@ -229,6 +229,13 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 			continue;
 		}
 
+		// lights[i].pnpPts(points,
+		// lights[i].center.x < lights[j].center.x?LightDescriptor::LEFT:LightDescriptor::RIGHT);
+		// lights[j].pnpPts(points,
+		// lights[i].center.x < lights[j].center.x?LightDescriptor::RIGHT:LightDescriptor::LEFT);
+
+		// sortPts(points);
+
 		cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));
 		cv::line(img, points[TR], points[BR], cv::Scalar(0, 255, 0));
 		cv::line(img, points[BR], points[BL], cv::Scalar(0, 255,0));
@@ -236,7 +243,7 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 
 		centers.push_back(center);
 
-		cv::putText(img, "Code: " + std::to_string(code), center, cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 255, 0));
+		cv::putText(img, std::to_string(code), center, cv::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0),3);
 		std::cout << "Code: " << code << "\tConfidence: " << confidence << std::endl;
 		points.clear();
 	}

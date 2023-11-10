@@ -10,7 +10,6 @@ public:
 	cv::Point2f center;
 	cv::Point2f pts[4];
 	cv::Point2f v;
-	cv::Point2f t;
 	double length;
 
 	enum{
@@ -24,16 +23,11 @@ public:
 			v = pts[1] - pts[0];
 			v /= light.size.height;
 
-			t = pts[3] - pts[0];
-			t /= 2;
 
 			length = light.size.height;
 		}else {
 			v = pts[3] - pts[0];
 			v /= light.size.width;
-
-			t = pts[0] - pts[1];
-			t /= 2;
 
 			length = light.size.width;
 		}
@@ -41,21 +35,21 @@ public:
 
 	void pnpPts(std::vector<cv::Point2f> &pnpPts, bool flag=LEFT){
 		if (flag) {
-			pnpPts.push_back(center+t+length/2*v);
-			pnpPts.push_back(center+t-length/2*v);
+			pnpPts.push_back(center+length/2*v);
+			pnpPts.push_back(center-length/2*v);
 		}else {
-			pnpPts.push_back(center-t+length/2*v);
-			pnpPts.push_back(center-t-length/2*v);
+			pnpPts.push_back(center+length/2*v);
+			pnpPts.push_back(center-length/2*v);
 		}
 	}
 
 	void extend(std::vector<cv::Point2f> &points, double ml,bool flag=LEFT){
 		if (flag) {
-			points.push_back(center+t+ml*120/56/2*v); //TL
-			points.push_back(center+t-ml*120/56/2*v); //BL
+			points.push_back(center+ml*120/56/2*v); //TL
+			points.push_back(center-ml*120/56/2*v); //BL
 		}else {
-			points.push_back(center-t+ml*120/56/2*v); //TR
-			points.push_back(center-t-ml*120/56/2*v); //BR
+			points.push_back(center+ml*120/56/2*v); //TR
+			points.push_back(center-ml*120/56/2*v); //BR
 		}
 	}
 };

@@ -224,22 +224,31 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 		auto code = std::get<0>(res);
 		auto confidence = std::get<1>(res);
 
-		if (code == 0 || confidence < 0.6) {
+		if (code == 0) {
 			points.clear();
 			continue;
 		}
 
-		// lights[i].pnpPts(points,
-		// lights[i].center.x < lights[j].center.x?LightDescriptor::LEFT:LightDescriptor::RIGHT);
-		// lights[j].pnpPts(points,
-		// lights[i].center.x < lights[j].center.x?LightDescriptor::RIGHT:LightDescriptor::LEFT);
+		points.clear();
 
-		// sortPts(points);
+		lights[i].pnpPts(points,
+		lights[i].center.x < lights[j].center.x?LightDescriptor::LEFT:LightDescriptor::RIGHT);
+		lights[j].pnpPts(points,
+		lights[i].center.x < lights[j].center.x?LightDescriptor::RIGHT:LightDescriptor::LEFT);
 
-		cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));
-		cv::line(img, points[TR], points[BR], cv::Scalar(0, 255, 0));
-		cv::line(img, points[BR], points[BL], cv::Scalar(0, 255,0));
-		cv::line(img, points[BL], points[TL], cv::Scalar(0, 255, 0));
+		sortPts(points);
+		// cv::Mat frame=img.clone();
+		// cv::putText(frame, "TL", points[TL], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		// cv::putText(frame, "TR", points[TR], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		// cv::putText(frame, "BL", points[BL], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		// cv::putText(frame, "BR", points[BR], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		
+		// cv::imshow("frame", frame);
+
+		// cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));
+		// cv::line(img, points[TR], points[BR], cv::Scalar(0, 255, 0));
+		// cv::line(img, points[BR], points[BL], cv::Scalar(0, 255,0));
+		// cv::line(img, points[BL], points[TL], cv::Scalar(0, 255, 0));
 
 		centers.push_back(center);
 

@@ -6,6 +6,7 @@
 #include "LightDescriptor/LightDescriptor.h"
 
 #include <cstddef>
+#include <fstream>
 #include <opencv2/opencv.hpp>
 
 const int minArea = 5;
@@ -22,7 +23,7 @@ public:
 	~Detector()=default;
 
 	cv::Mat preprocess(cv::Mat img, COLOR_TAG tag);
-	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag);
+	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag,std::ofstream &log);
 
 private:
 };

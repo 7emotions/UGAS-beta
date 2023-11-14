@@ -22,6 +22,11 @@ public:
 		return armorType;
 	}
 
+
+	std::vector<cv::Point2f> getPoints() {
+		return pts;
+	}
+
 private:
 	std::vector<cv::Point2f> pts;
 	ArmorType armorType;

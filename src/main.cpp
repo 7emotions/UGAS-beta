@@ -2,6 +2,7 @@
 #include "HikCamera/HikCamera.h"
 
 #include <cstddef>
+#include <fstream>
 #include <iostream>
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/utility.hpp>
@@ -28,6 +29,12 @@ int main(){
 
     std::cout << "Connected to camera" << std::endl;
     
+	std::ofstream outfile("../records.csv");
+
+	if (!outfile) {
+		std::cerr << "Failed to open file" << std::endl;
+		return 1;
+	}
 
     cv::Mat img;
     do {
@@ -35,12 +42,14 @@ int main(){
         if (img.empty()) {
             break;
         }
-        img = detector.DetectLights(img, (Detector::COLOR_TAG)tag);
+        img = detector.DetectLights(img, (Detector::COLOR_TAG)tag,outfile);
 
         cv::imshow("Detected Lights", img);
         if (cv::waitKey(10)==27) {
             break;
         }
     }while (true);
+
+	outfile.close();
     return 0;
 }

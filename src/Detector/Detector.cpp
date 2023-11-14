@@ -1,14 +1,19 @@
 ﻿#include "Detector.h"
+#include "ArmorDescriptor/ArmorDescriptor.h"
 #include "Identify/NumberIdentify.h"
 #include "LightDescriptor/LightDescriptor.h"
+#include "PnPSolver/PnPSolver.h"
 
 #include <algorithm>
 #include <cmath>
 #include <complex>
 #include <cstddef>
 #include <exception>
+#include <fstream>
 #include <iostream>
 #include <math.h>
+#include <opencv2/core/matx.hpp>
+#include <ostream>
 #include <string>
 #include <system_error>
 #include <tuple>
@@ -125,7 +130,7 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 }
 
 
-cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
+cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &outfile) {
 
   Detector myDetector;
   std::vector<LightDescriptor> lights;
@@ -168,7 +173,7 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 		bool loopFlag = true;
 		auto center = (lights[i].center + lights[j].center)/2;
 		for (size_t i=0; i<centers.size(); i++) {
-			if (EuDis(center, centers[i])<5) {
+			if (EuDis(center, centers[i])<10) {
 				loopFlag = false;
 				break;
 			}
@@ -237,23 +242,44 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 		lights[i].center.x < lights[j].center.x?LightDescriptor::RIGHT:LightDescriptor::LEFT);
 
 		sortPts(points);
-		// cv::Mat frame=img.clone();
-		// cv::putText(frame, "TL", points[TL], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
-		// cv::putText(frame, "TR", points[TR], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
-		// cv::putText(frame, "BL", points[BL], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
-		// cv::putText(frame, "BR", points[BR], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		cv::Mat frame=img.clone();
+		cv::putText(frame, "TL", points[TL], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		cv::putText(frame, "TR", points[TR], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		cv::putText(frame, "BL", points[BL], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+		cv::putText(frame, "BR", points[BR], cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
 		
-		// cv::imshow("frame", frame);
+		cv::imshow("frame", frame);
 
 		// cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));
 		// cv::line(img, points[TR], points[BR], cv::Scalar(0, 255, 0));
 		// cv::line(img, points[BR], points[BL], cv::Scalar(0, 255,0));
 		// cv::line(img, points[BL], points[TL], cv::Scalar(0, 255, 0));
 
+
+		//cv::putText(img, std::to_string(code), center, );
+		std::cout << "Code: " << code << "\tConfidence: " << confidence << std::endl;
+
+		if (code == 0 || confidence < 0.65) {
+			//continue;
+		}
+
 		centers.push_back(center);
 
-		cv::putText(img, std::to_string(code), center, cv::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0),3);
-		std::cout << "Code: " << code << "\tConfidence: " << confidence << std::endl;
+		ArmorDescriptor armor(points,code);
+		
+		cv::Mat rot;
+		cv::Mat t;
+
+		PnPSolver solver;
+		
+		solver.solve(armor, rot, t);
+
+		double norm = sqrt(pow(t.at<double>(0),2)+pow(t.at<double>(1),2)+pow(t.at<double>(2),2));
+
+		outfile << norm << std::endl;
+
+		std::cout<<t<<std::endl;
+		cv::putText(img, std::to_string(norm), center, cv::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0),3);
 		points.clear();
 	}
   }

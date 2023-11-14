@@ -6,10 +6,10 @@
 class PnPSolver{
 
 public:
-    PnPSolver();
-    ~PnPSolver();
+    PnPSolver()=default;
+    ~PnPSolver()=default;
 
-	void solve(const std::vector<cv::Point2f>& points2D, ArmorDescriptor armor);
+	void solve(ArmorDescriptor armor, cv::Mat &rot, cv::Mat &t);
 
 private:
 };

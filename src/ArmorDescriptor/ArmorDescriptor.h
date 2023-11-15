@@ -11,6 +11,8 @@ public:
 		}else {
 			armorType = NormalArmor;
 		}
+
+		center = (pts[0] + pts[1] + pts[2] + pts[3])/4;
 	}
 
 	enum ArmorType{
@@ -27,7 +29,12 @@ public:
 		return pts;
 	}
 
+	cv::Point2f getCenter() {
+		return center;
+	}
+
 private:
 	std::vector<cv::Point2f> pts;
 	ArmorType armorType;
+	cv::Point2f	center;
 };

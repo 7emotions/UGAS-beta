@@ -29,7 +29,7 @@ int main(){
 
     std::cout << "Connected to camera" << std::endl;
     
-	std::ofstream outfile("../records.csv");
+	std::ofstream outfile("../resources/records.csv");
 
 	if (!outfile) {
 		std::cerr << "Failed to open file" << std::endl;

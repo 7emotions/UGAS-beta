@@ -5,8 +5,8 @@
 
 class ArmorDescriptor{
 public:
-	ArmorDescriptor(std::vector<cv::Point2f> _pts, int code):pts(_pts){
-		if (code == 1 || (code < 10 && code > 6)) {
+	ArmorDescriptor(std::vector<cv::Point2f> _pts, int _code):pts(_pts),code(_code){
+		if (_code == 1 || (_code < 10 && _code > 6)) {
 			armorType = LargeArmor;
 		}else {
 			armorType = NormalArmor;
@@ -33,8 +33,13 @@ public:
 		return center;
 	}
 
+	int getCode() {
+		return code;
+	}
+
 private:
 	std::vector<cv::Point2f> pts;
 	ArmorType armorType;
 	cv::Point2f	center;
+	int code;
 };

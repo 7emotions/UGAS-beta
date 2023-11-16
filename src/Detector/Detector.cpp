@@ -133,6 +133,8 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 
 cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &outfile) {
 
+  cv::Point2i origin(img.cols / 2, img.rows / 2);
+
   Detector myDetector;
   std::vector<LightDescriptor> lights;
   std::vector<ArmorDescriptor> armors;
@@ -266,6 +268,11 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &o
 		}
 
 		centers.push_back(center);
+		for (auto& armor : armors) {
+			if (armor.getCode() == code) {
+				
+			}
+		}
 		armors.push_back(ArmorDescriptor(points, code));
 		
 		points.clear();
@@ -277,6 +284,9 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &o
 	cv::Mat t;
 
 	PnPSolver solver;
+	if (armor.getCode() == 4) {
+		continue;
+	}
 		
 	solver.solve(armor, rot, t);
 
@@ -288,7 +298,12 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &o
 
 	std::cout<<t<<std::endl;
 	cv::putText(img, cv::format("%.2fm",norm), armor.getCenter(), cv::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0),3);
-		
+	
+	auto yaw = atanf(p.x/p.z) *180.0/CV_PI;
+	auto pitch = atanf(-p.y/p.z) *180.0/CV_PI;
+  
+	std::cout<<"Yaw: "<<yaw<<"\tPitch: "<<pitch<<std::endl;
+	
   }
 
 

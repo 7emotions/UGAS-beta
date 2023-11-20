@@ -284,7 +284,7 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &o
 	cv::Mat t;
 
 	PnPSolver solver;
-	if (armor.getCode() == 4) {
+	if (armor.getCode() != 4) {
 		continue;
 	}
 		
@@ -306,7 +306,7 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &o
 	
   }
 
-
+  armors.clear();
   centers.clear();
   return img;
 }

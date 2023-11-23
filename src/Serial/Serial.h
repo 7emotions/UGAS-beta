@@ -98,28 +98,18 @@ public:
 	 * 
 	 * @return uint8_t crc
 	 */
-	uint8_t crc(){
-		uint8_t crc = 0;
-		uint8_t *p = ptr;
-		for (int j = 0; j < pkg_size; j++)
-		{
-	
-			crc ^= *(p+j);
-			for (int i = 0; i < 8; i++)
-			{
-	
-				if ((crc & 0x01) != 0)
-				{
-	
-					crc >>= 1;
-					crc ^= 0x8c;
-				}
-				else
-					crc >>= 1;
-			}
-		}
-		return crc;
-	}
+	uint8_t crc() {
+        uint8_t ucCRC8 = pkg_head;
+        const uint8_t* pch_message = pkg_body;
+        unsigned char uc_index;
+		size_t size = pkg_size;
+        while (size--)
+        {
+            uc_index = ucCRC8 ^ (*pch_message++);
+            ucCRC8 = table[uc_index];
+        }
+        return(ucCRC8);
+    }
 
 
 
@@ -129,7 +119,6 @@ private:
 	int serial;
 	
 	Package package;
-	uint8_t *ptr=(uint8_t *)&package;
 
 	uint8_t pkg_body[pkg_size]={0};
 	uint8_t pkg_end;

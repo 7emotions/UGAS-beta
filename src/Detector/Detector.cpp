@@ -3,6 +3,7 @@
 #include "Identify/NumberIdentify.h"
 #include "LightDescriptor/LightDescriptor.h"
 #include "PnPSolver/PnPSolver.h"
+#include "Serial/Serial.h"
 
 #include <algorithm>
 #include <cmath>
@@ -279,6 +280,9 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &o
 	}
   }
 
+  SerialUtil sender;
+	
+
   for(auto& armor : armors){
 	cv::Mat rot;
 	cv::Mat t;
@@ -301,8 +305,9 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &o
 	
 	auto yaw = atanf(p.x/p.z) *180.0/CV_PI;
 	auto pitch = atanf(-p.y/p.z) *180.0/CV_PI;
-  
-	std::cout<<"Yaw: "<<yaw<<"\tPitch: "<<pitch<<std::endl;
+	
+	sender.pack(yaw, pitch, 0, 0, 0);
+	sender.send();
 	
   }
 

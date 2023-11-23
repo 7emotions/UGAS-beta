@@ -44,7 +44,7 @@ int main(){
         }
         img = detector.DetectLights(img, (Detector::COLOR_TAG)tag,outfile);
 
-        cv::imshow("Detected Lights", img);
+        //cv::imshow("Detected Lights", img);
         if (cv::waitKey(10)==27) {
             break;
         }

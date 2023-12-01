@@ -25,7 +25,7 @@ public:
 	SerialUtil(){
 		memset(&package, 0, sizeof(package));
 
-		serial = open("/dev/ttyUSB0",O_RDWR | O_NOCTTY | O_SYNC);
+		serial = open("/dev/CBoard",O_RDWR | O_NOCTTY | O_SYNC);
 		if(serial == -1){
 			perror("Failed to open serial port.");
 			return;
@@ -103,7 +103,7 @@ public:
         uint8_t ucCRC8 = pkg_head;
         const uint8_t* pch_message = pkg_body;
         unsigned char uc_index;
-		size_t size = pkg_size;
+		size_t size = pkg_size - 2;
         while (size--)
         {
             uc_index = ucCRC8 ^ (*pch_message++);
@@ -115,15 +115,15 @@ public:
 
 
 private:
-	static const size_t pkg_size=sizeof(Package);
+	static const size_t pkg_size=sizeof(Package) + 2;
 	static const uint8_t pkg_head=0xff;
 	int serial;
 	
 	Package package;
 
-	uint8_t pkg_body[pkg_size]={0};
+	uint8_t pkg_body[pkg_size - 2]={0};
 	uint8_t pkg_end;
-	uint8_t pkg[pkg_size+2]={0};
+	uint8_t pkg[pkg_size]={0};
 
 	static constexpr uint8_t table[256] = {
                 0x00, 0x5e, 0xbc, 0xe2, 0x61, 0x3f, 0xdd, 0x83, 0xc2, 0x9c, 0x7e, 0x20, 0xa3, 0xfd, 0x1f, 0x41,

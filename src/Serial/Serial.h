@@ -12,12 +12,13 @@
 #include <iostream>
 #include <unistd.h>
 
-
+#pragma pack(push, 1)
 typedef struct PackageInfo{
 	float yaw,pitch; //0，4
 	uint16_t rect_x,rect_y; //8, 10
 	uint8_t color; //12 13 16
 } Package;
+#pragma pack(pop)
 
 class SerialUtil{
 public:

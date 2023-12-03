@@ -1,5 +1,9 @@
 #include  "Serial/Serial.h"
+#include <cstddef>
 #include <cstdint>
+#include <fstream>
+#include <ios>
+#include <opencv2/core/hal/interface.h>
 #include <unistd.h>
 
 
@@ -16,6 +20,13 @@ void SerialUtil::send(){
 	*(pkg+pkg_size - 1) = crc();
 	
 
-	write(serial, pkg, pkg_size);
+	auto count = write(serial, pkg, pkg_size);
+
+	for (size_t i = 0; i < pkg_size; i++)
+	{
+		std::cout << (uchar)*(pkg+i) << std::endl;
+	}	
+
+	std::cout << "Serial Write Count" << count << std::endl;
 }
 

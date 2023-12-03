@@ -103,7 +103,7 @@ public:
         uint8_t ucCRC8 = pkg_head;
         const uint8_t* pch_message = pkg_body;
         unsigned char uc_index;
-		size_t size = pkg_size - 2;
+		size_t size = pkg_size - 1;
         while (size--)
         {
             uc_index = ucCRC8 ^ (*pch_message++);
@@ -112,6 +112,12 @@ public:
         return(ucCRC8);
     }
 
+	void recv(){
+		char buff[1024] = {0};
+
+		read(serial, buff, 1024);
+		std::cout << "read:"<<buff << std::endl;
+	}
 
 
 private:

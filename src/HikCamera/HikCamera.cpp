@@ -30,41 +30,41 @@ bool HikCamera::connectDeivce(){
 
     nRet = MV_CC_EnumDevices(MV_USB_DEVICE, &stDeviceList);
     if (nRet != MV_OK) {
-        std::cerr << "EnumDevices fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
+        std::cout << "EnumDevices fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
         return false;
     }
     if (stDeviceList.nDeviceNum != 1 || !this->isUSEDevice(stDeviceList.pDeviceInfo[0])) {
-        std::cerr << "No USB device connected or multiple devices connected!" << std::endl;
+        std::cout << "No USB device connected or multiple devices connected!" << std::endl;
         return false;
     }
 
     nRet = MV_CC_CreateHandle(&handle, stDeviceList.pDeviceInfo[0]);
     if (nRet != MV_OK) {
-        std::cerr << "Create Handle fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
+        std::cout << "Create Handle fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
         return false;
     }
     nRet = MV_CC_OpenDevice(handle);
     if (nRet != MV_OK) {
-        std::cerr << "Open Device fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
+        std::cout << "Open Device fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
         return false;
     }
     
     nRet = MV_CC_SetEnumValue(handle, "TriggerMode", 0);
     if (nRet != MV_OK) {
-        std::cerr << "Set TriggerMode fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
+        std::cout << "Set TriggerMode fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
         return false;
     }
 
     memset(&stParam, 0, sizeof(MVCC_INTVALUE));
     nRet = MV_CC_GetIntValue(handle, "PayloadSize", &stParam);
     if (nRet != MV_OK) {
-        std::cerr << "Get PayloadSize fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
+        std::cout << "Get PayloadSize fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
         return false;
     }
 
     nRet = MV_CC_StartGrabbing(handle);
     if (nRet != MV_OK) {
-        std::cerr << "Start Grabbing fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
+        std::cout << "Start Grabbing fail! nRet [0x" << std::hex << nRet << "]" << std::endl;
         return false;
     }
 

@@ -23,7 +23,7 @@ public:
 	~Detector()=default;
 
 	cv::Mat preprocess(cv::Mat img, COLOR_TAG tag);
-	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag,std::ofstream &log);
+	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag);
 
 private:
 };

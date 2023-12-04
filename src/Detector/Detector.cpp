@@ -132,7 +132,7 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 }
 
 
-cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::ofstream &outfile) {
+cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 
   cv::Point2i origin(img.cols / 2, img.rows / 2);
 

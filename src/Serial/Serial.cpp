@@ -22,10 +22,7 @@ void SerialUtil::send(){
 
 	auto count = write(serial, pkg, pkg_size);
 
-	for (size_t i = 0; i < pkg_size; i++)
-	{
-		std::cout << (uchar)*(pkg+i) << std::endl;
-	}	
+	std::cout << "CRC: " << (uint8_t)*(pkg+pkg_size-1) << std::endl;
 
 	std::cout << "Serial Write Count" << count << std::endl;
 }

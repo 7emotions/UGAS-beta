@@ -15,9 +15,9 @@
 int main(){
 	SerialUtil sender;
 	while (true) {
-		sender.pack(30, 0, 0, 0, 0);
+		sender.pack(10, 0, 0, 0, 0);
 		sender.send();
-		sleep(1);
+		usleep(1000000);
 	}
 	return 0;
 }

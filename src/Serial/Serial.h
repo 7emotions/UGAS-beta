@@ -58,12 +58,11 @@ public:
 
     tty.c_oflag &= ~OPOST;
 
-	if ((tcsetattr(serial, TCSANOW, &tty)) != 0){
-		std::cout << "Error in setting serial" << std::endl;
-	}
-	else{
-		std::cout << "Baudrate=115200" << std::endl;	
-	}
+    if ((tcsetattr(serial, TCSANOW, &tty)) != 0) {
+      std::cout << "Error in setting serial" << std::endl;
+    } else {
+      std::cout << "Baudrate=115200" << std::endl;
+    }
   }
 
   ~SerialUtil() { close(serial); }
@@ -88,27 +87,22 @@ public:
 
   void send();
 
-  /**
-   * @brief clear previous package
-   *
-   */
-  void clear() { memset(pkg, 0, pkg_size + 2); }
-
-  /**
-   * @brief calculate crc code
-   *
-   * @return uint8_t crc
-   */
-  uint8_t crc() {
-    uint8_t ucCRC8 = pkg_head;
-    const uint8_t *pch_message = pkg_body;
-    unsigned char uc_index;
-    size_t size = pkg_size - 1;
-    while (size--) {
-      uc_index = ucCRC8 ^ (*pch_message++);
-      ucCRC8 = table[uc_index];
+  uint8_t Get_CRC8_Check_Sum(uint8_t *pchMessage, uint16_t dwLength,
+                             uint8_t ucCRC8) {
+    uint8_t ucIndex;
+    while (dwLength--) {
+      ucIndex = ucCRC8 ^ (*pchMessage++);
+      ucCRC8 = CRC8_TAB[ucIndex];
     }
     return (ucCRC8);
+  }
+
+  void Append_CRC8_Check_Sum(uint8_t *pchMessage, uint16_t dwLength) {
+    uint8_t ucCRC = 0;
+    if ((pchMessage == 0) || (dwLength <= 2))
+      return;
+    ucCRC = Get_CRC8_Check_Sum((uint8_t *)pchMessage, dwLength - 1, pkg_head);
+    pchMessage[dwLength - 1] = ucCRC;
   }
 
   void recv() {
@@ -125,11 +119,7 @@ private:
 
   Package package;
 
-  uint8_t pkg_body[pkg_size - 2] = {0};
-  uint8_t pkg_end;
-  uint8_t pkg[pkg_size] = {0};
-
-  static constexpr uint8_t table[256] = {
+  const uint8_t CRC8_TAB[256] = {
       0x00, 0x5e, 0xbc, 0xe2, 0x61, 0x3f, 0xdd, 0x83, 0xc2, 0x9c, 0x7e, 0x20,
       0xa3, 0xfd, 0x1f, 0x41, 0x9d, 0xc3, 0x21, 0x7f, 0xfc, 0xa2, 0x40, 0x1e,
       0x5f, 0x01, 0xe3, 0xbd, 0x3e, 0x60, 0x82, 0xdc, 0x23, 0x7d, 0x9f, 0xc1,

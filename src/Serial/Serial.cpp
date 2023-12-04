@@ -8,22 +8,21 @@
 
 
 void SerialUtil::send(){
-	clear();
-	
-	*pkg = pkg_head;
+	uint8_t pkg[pkg_size]={0};
+
 	auto ptr = (uint8_t*)&package;
-	
-	for(size_t i=1;i<=pkg_size - 2;i++){
-		*(pkg+i)=*(ptr+i-1);
+
+	pkg[0]=0xff;
+
+	for(int i=0;i<pkg_size-1;i++){
+		pkg[i+1]=*(ptr+i);
 	}
 
-	*(pkg+pkg_size - 1) = crc();
-	
+	Append_CRC8_Check_Sum(pkg,pkg_size);
 
 	auto count = write(serial, pkg, pkg_size);
-
-	std::cout << "CRC: " << (uint8_t)*(pkg+pkg_size-1) << std::endl;
-
-	std::cout << "Serial Write Count" << count << std::endl;
+	if(count != pkg_size){
+		std::cout << "send error" << std::endl;
+	}
 }
 

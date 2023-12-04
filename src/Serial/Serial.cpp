@@ -14,13 +14,13 @@ void SerialUtil::send(){
 
 	pkg[0]=0xff;
 
-	for(int i=0;i<pkg_size-1;i++){
+	for(size_t i=0;i<pkg_size-1;i++){
 		pkg[i+1]=*(ptr+i);
 	}
 
 	Append_CRC8_Check_Sum(pkg,pkg_size);
 
-	auto count = write(serial, pkg, pkg_size);
+	auto count = write(pkg, pkg_size);
 	if(count != pkg_size){
 		std::cout << "send error" << std::endl;
 	}

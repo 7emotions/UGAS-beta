@@ -24,7 +24,7 @@ std::tuple<int,double> NumberIdentify::Identify(cv::Mat &img)
     std::tuple<int,double> resultMsg(maxLoc.x,maxValue);
 
 	if (maxLoc.x != 0) {
-		cv::imshow(std::to_string(maxLoc.x),inputImage);
+		//cv::imshow(std::to_string(maxLoc.x),inputImage);
 	}
 
     return resultMsg;

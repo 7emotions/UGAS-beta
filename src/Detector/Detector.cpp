@@ -132,13 +132,12 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 }
 
 
-cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
+cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::vector<ArmorDescriptor> &armors) {
 
   cv::Point2i origin(img.cols / 2, img.rows / 2);
 
-  Detector myDetector;
   std::vector<LightDescriptor> lights;
-  std::vector<ArmorDescriptor> armors;
+  
 
   std::vector<std::vector<cv::Point>> contours;
   std::vector<cv::Vec4i> hierarchy;
@@ -147,7 +146,7 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 
   NumberIdentify identifier("../model/NINNModel.onnx");
 
-  cv::Mat pre = myDetector.preprocess(img, color_tag);
+  cv::Mat pre = preprocess(img, color_tag);
 
   // cv::imshow("pre",pre);
   cv::findContours(pre, contours, hierarchy, cv::RETR_TREE,
@@ -280,38 +279,5 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag) {
 	}
   }
 
-  SerialUtil sender;
-	
-
-  for(auto& armor : armors){
-	cv::Mat rot;
-	cv::Mat t;
-
-	PnPSolver solver;
-	if (armor.getCode() != 4) {
-		continue;
-	}
-		
-	solver.solve(armor, rot, t);
-
-	cv::Point3d p={t.at<double>(0),t.at<double>(1),t.at<double>(2)};
-	p/=1000.0;
-	auto norm = cv::norm(p);
-
-	//outfile << norm << std::endl;
-
-	std::cout<<t<<std::endl;
-	cv::putText(img, cv::format("%.2fm",norm), armor.getCenter(), cv::FONT_HERSHEY_SIMPLEX, 3, cv::Scalar(0, 255, 0),3);
-	
-	auto yaw = atanf(p.x/p.z) *180.0/CV_PI;
-	auto pitch = atanf(-p.y/p.z) *180.0/CV_PI;
-	
-	sender.pack(yaw, pitch, 0, 0, 0);
-	sender.send();
-	
-  }
-
-  armors.clear();
-  centers.clear();
   return img;
 }

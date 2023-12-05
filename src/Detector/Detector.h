@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ArmorDescriptor/ArmorDescriptor.h"
 #include "LightDescriptor/LightDescriptor.h"
 
 #include <cstddef>
@@ -23,7 +24,7 @@ public:
 	~Detector()=default;
 
 	cv::Mat preprocess(cv::Mat img, COLOR_TAG tag);
-	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag);
+	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag,std::vector<ArmorDescriptor> &armors);
 
 private:
 };

@@ -24,10 +24,33 @@ typedef struct PackageInfo {
 
 class SerialUtil {
 public:
-  SerialUtil() {
+  typedef enum{
+	BYTE_FIVE=5,
+	BYTE_SIX,
+	BYTE_SEVEN,
+	BYTE_EIGHT
+  }BYTESIZE;
+
+  typedef enum{
+	BIT_ONE=1,
+	BIT_TWO,
+	BIT_THREE
+  }STOPBIT;
+
+  typedef enum{
+	PARITY_NONE,
+	PARITY_ODD,
+	PARITY_EVEN
+  }PARITY;
+
+  SerialUtil(const char* port="/dev/CBoard" ,
+  	int baudrate_ = 115200,
+  	BYTESIZE bytesize_ = BYTE_EIGHT,
+  	STOPBIT stopbits_ = BIT_ONE,
+	PARITY parity_ = PARITY_NONE) {
     memset(&package, 0, sizeof(package));
 
-    serial = open("/dev/CBoard", O_RDWR | O_NOCTTY | O_NDELAY);
+    serial = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
     if (serial == -1) {
       // Can only operate on a valid file descriptor
       //THROW(IOException, "Invalid file descriptor, is the serial port open?");
@@ -57,8 +80,7 @@ public:
 
     // setup baud rate
     bool custom_baud = false;
-    speed_t baud;
-	auto baudrate_ = 115200;
+    speed_t baud=B115200;
     switch (baudrate_) {
 #ifdef B0
     case 0:
@@ -261,33 +283,33 @@ public:
       ::cfsetospeed(&options, baud);
 #endif
     }
-	auto bytesize_ = 8;
+	
     // setup char len
     options.c_cflag &= (tcflag_t)~CSIZE;
-    if (bytesize_ == 8)
+    if (bytesize_ == BYTE_EIGHT)
       options.c_cflag |= CS8;
-    else if (bytesize_ == 7)
+    else if (bytesize_ == BYTE_SEVEN)
       options.c_cflag |= CS7;
-    else if (bytesize_ == 6)
+    else if (bytesize_ == BYTE_SIX)
       options.c_cflag |= CS6;
-    else if (bytesize_ == 5)
+    else if (bytesize_ == BYTE_FIVE)
       options.c_cflag |= CS5;
     else
       throw std::runtime_error("invalid char len");
 
-	auto stopbits_ = 1;
+	
     // setup stopbits
-    if (stopbits_ == 1)
+    if (stopbits_ == BIT_ONE)
       options.c_cflag &= (tcflag_t) ~(CSTOPB);
-    else if (stopbits_ == 3)
+    else if (stopbits_ == BIT_THREE)
       // ONE POINT FIVE same as TWO.. there is no POSIX support for 1.5
       options.c_cflag |= (CSTOPB);
-    else if (stopbits_ == 2)
+    else if (stopbits_ == BIT_TWO)
       options.c_cflag |= (CSTOPB);
     else
       throw std::runtime_error("invalid stop bit");
 
-	auto parity_ = 0;
+	
     // setup parity
     options.c_iflag &= (tcflag_t) ~(INPCK | ISTRIP);
     if (parity_ == 0) {
@@ -356,11 +378,6 @@ public:
 #else
 #error "OS Support seems wrong."
 #endif
-
-    // http://www.unixwiz.net/techtips/termios-vmin-vtime.html
-    // this basically sets the read call up to be a polling read,
-    // but we are using select to ensure there is data available
-    // to read before each call, so we should never needlessly poll
     options.c_cc[VMIN] = 0;
     options.c_cc[VTIME] = 0;
 
@@ -369,38 +386,9 @@ public:
 
     // apply custom baud rate, if any
     if (custom_baud == true) {
-      // OS X support
-#if defined(MAC_OS_X_VERSION_10_4) &&                                          \
-    (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_4)
-      // Starting with Tiger, the IOSSIOSPEED ioctl can be used to set arbitrary
-      // baud rates other than those specified by POSIX. The driver for the
-      // underlying serial hardware ultimately determines which baud rates can
-      // be used. This ioctl sets both the input and output speed.
-      speed_t new_baud = static_cast<speed_t>(baudrate_);
-      // PySerial uses IOSSIOSPEED=0x80045402
-      if (-1 == ioctl(serial, IOSSIOSPEED, &new_baud, 1)) {
-        THROW(IOException, errno);
-      }
-      // Linux Support
-#elif defined(__linux__) && defined(TIOCSSERIAL)
-      struct serial_struct ser;
 
-      if (-1 == ioctl(serial, TIOCGSERIAL, &ser)) {
-        THROW(IOException, errno);
-      }
-
-      // set custom divisor
-      ser.custom_divisor = ser.baud_base / static_cast<int>(baudrate_);
-      // update flags
-      ser.flags &= ~ASYNC_SPD_MASK;
-      ser.flags |= ASYNC_SPD_CUST;
-
-      if (-1 == ioctl(serial, TIOCSSERIAL, &ser)) {
-        THROW(IOException, errno);
-      }
-#else
       throw std::runtime_error("OS does not currently support custom bauds");
-#endif
+
     }
 
     
@@ -413,9 +401,6 @@ public:
 
 
   while (bytes_written < length) {
-    // Only consider the timeout if it's not the first iteration of the loop
-    // otherwise a timeout of 0 won't be allowed through
-   
 
 
     FD_ZERO (&writefds);
@@ -424,7 +409,6 @@ public:
     // Do the select
     int r = pselect (serial + 1, NULL, &writefds, NULL, NULL, NULL);
 
-    // Figure out what happened by looking at select's response 'r'
     /** Error **/
     if (r < 0) {
       // Select was interrupted, try again
@@ -489,44 +473,6 @@ public:
   }
   return bytes_written;
 }
-
-    //     if (serial == -1) {
-    //       std::cout << "Failed to open serial." << std::endl;
-    //       throw std::runtime_error("Failed to open serial");
-    //     }
-
-    //     std::cout << "Serial opened." << std::endl;
-
-    //     struct termios tty;
-    //     cfsetispeed(&tty, 115200);
-    //     cfsetospeed(&tty, 115200);
-    //     // 设置没有校验
-    //     tty.c_cflag &= ~PARENB;
-
-    //     // 停止位 = 1
-    //     tty.c_cflag &= ~CSTOPB;
-    //     tty.c_cflag &= ~CSIZE;
-
-    //     // 设置数据位 = 8
-    //     tty.c_cflag |= CS8;
-
-    //     tty.c_cflag &= ~CRTSCTS;
-    //     tty.c_cflag |= CREAD | CLOCAL;
-
-    //     // 关闭软件流动控制
-    //     tty.c_iflag &= ~(IXON | IXOFF | IXANY);
-
-    //     // 设置操作模式
-    //     tty.c_iflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-
-    //     tty.c_oflag &= ~OPOST;
-
-    //     if ((tcsetattr(serial, TCSANOW, &tty)) != 0) {
-    //       std::cout << "Error in setting serial" << std::endl;
-    //     } else {
-    //       std::cout << "Baudrate=115200" << std::endl;
-    //     }
-    //   }
 
     ~SerialUtil() { close(serial); }
 

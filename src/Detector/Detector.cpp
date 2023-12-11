@@ -1,6 +1,5 @@
 ﻿#include "Detector.h"
 #include "ArmorDescriptor/ArmorDescriptor.h"
-#include "Identify/NumberIdentify.h"
 #include "LightDescriptor/LightDescriptor.h"
 #include "PnPSolver/PnPSolver.h"
 #include "Serial/Serial.h"
@@ -143,8 +142,6 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::vector<Armo
   std::vector<cv::Vec4i> hierarchy;
 
   std::vector<cv::Point2f> centers;
-
-  NumberIdentify identifier("../model/NINNModel.onnx");
 
   cv::Mat pre = preprocess(img, color_tag);
 

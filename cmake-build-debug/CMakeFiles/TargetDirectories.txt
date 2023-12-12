@@ -1,0 +1,3 @@
+/home/iruma/UGAS-beta/cmake-build-debug/CMakeFiles/ugas-beta.dir
+/home/iruma/UGAS-beta/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/iruma/UGAS-beta/cmake-build-debug/CMakeFiles/rebuild_cache.dir

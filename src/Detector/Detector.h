@@ -26,6 +26,10 @@ public:
 	cv::Mat preprocess(cv::Mat img, COLOR_TAG tag);
 	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag,std::vector<ArmorDescriptor> &armors);
 
-private:
+protected:
+    double crossProduct(cv::Point2f a, cv::Point2f b);
+    double EuDis(cv::Point2f a, cv::Point2f b);
+    void sortPts(std::vector<cv::Point2f> &points);
+    void perspective(cv::Mat &img, std::vector<cv::Point2f> &points, cv::Mat &roi);
 };
 

@@ -23,6 +23,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 # Find non-ros packages
 find_package(OpenCV 4.7 REQUIRED)
 find_package(HikCameraSDK REQUIRED)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Core)
 
 # Include project source directory
 include_directories(${PROJECT_SOURCE_DIR}/src ${CONFIGURE_DIR_PATH})
@@ -37,4 +38,4 @@ file(GLOB_RECURSE UGAS_SOURCE CONFIGURE_DEPENDS
 add_executable(${EXECUTABLE_NAME} ${UGAS_SOURCE})
 
 # Link libraries
-target_link_libraries(${EXECUTABLE_NAME} ${OpenCV_LIBS} ${HikCameraSDK_LIB} ${OpenVINO_LIB} -lpthread)
+target_link_libraries(${EXECUTABLE_NAME} ${OpenCV_LIBS} ${HikCameraSDK_LIB} ${OpenVINO_LIB} Qt5::Widgets -lpthread)

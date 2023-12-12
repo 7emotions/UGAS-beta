@@ -29,17 +29,17 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
-inline double crossProduct(cv::Point2f a, cv::Point2f b){
+double Detector::crossProduct(cv::Point2f a, cv::Point2f b){
 	return a.x*b.y - a.y*b.x;
 }
 
-inline double EuDis(cv::Point2f a, cv::Point2f b) {
+double Detector::EuDis(cv::Point2f a, cv::Point2f b) {
   return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
 }
 
 
 
-void sortPts(std::vector<cv::Point2f> &points) {
+void Detector::sortPts(std::vector<cv::Point2f> &points) {
 	std::sort(points.begin(), points.end(),
             [](const cv::Point2f &a, const cv::Point2f &b) { return a.x+a.y > b.x+b.y; });
 	auto tl = points[0];
@@ -93,7 +93,7 @@ void sortPts(std::vector<cv::Point2f> &points) {
 }
 enum { BR, BL, TR, TL };
 
-void perspective(cv::Mat &img, std::vector<cv::Point2f> &points, cv::Mat &roi) {
+void Detector::perspective(cv::Mat &img, std::vector<cv::Point2f> &points, cv::Mat &roi) {
   auto leftHeight = EuDis(points[TL], points[BL]);
   auto rightHeight = EuDis(points[TR], points[BR]);
   auto maxHeight = std::max(leftHeight, rightHeight);
@@ -144,11 +144,10 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::vector<Armo
 
   std::vector<cv::Point2f> centers;
 
-  NumberIdentify identifier("../model/NINNModel.onnx");
+  NumberIdentify identifier("../model/best.onnx");
 
   cv::Mat pre = preprocess(img, color_tag);
 
-  // cv::imshow("pre",pre);
   cv::findContours(pre, contours, hierarchy, cv::RETR_TREE,
                    cv::CHAIN_APPROX_NONE, cv::Point());
 
@@ -228,7 +227,9 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,std::vector<Armo
 
 		cv::Mat roi;
 		perspective(img, points, roi);
-		
+//        cv::imshow("roi",roi);
+//        cv::waitKey(0);
+//        cv::destroyAllWindows();
 		auto res = identifier.Identify(roi);
 		auto code = std::get<0>(res);
 		auto confidence = std::get<1>(res);

@@ -5,16 +5,17 @@
 #include "Serial/Serial.h"
 
 class PanTiltUtil {
-public:
+   public:
 	PanTiltUtil() = default;
 	~PanTiltUtil() = default;
 
 	void aim(ArmorDescriptor armor);
-	void aim(){
+	void aim() {
 		sender.pack(0, 0, 0, 0, 0);
 		sender.send();
 	}
-private:
+
+   private:
 	SerialUtil sender;
 	PnPSolver solver;
 };

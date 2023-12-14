@@ -3,13 +3,7 @@
 #include <iostream>
 
 void PanTiltUtil::aim(ArmorDescriptor armor) {
-	cv::Mat rot;
-	cv::Mat t;
-
-	solver.solve(armor, rot, t);
-
-	cv::Point3d p = {t.at<double>(0), t.at<double>(1), t.at<double>(2)};
-
+	auto p = armor.get3DPoint();
 	auto yaw = -atanf(p.x / p.z) * 180.0 / CV_PI;
 	auto pitch = -atanf(-p.y / p.z) * 180.0 / CV_PI;
 

@@ -20,13 +20,6 @@
 #include "ArmorDescriptor/ArmorDescriptor.h"
 #include "LightDescriptor/LightDescriptor.h"
 
-inline double crossProduct(cv::Point2f a, cv::Point2f b) {
-	return a.x * b.y - a.y * b.x;
-}
-
-inline double EuDis(cv::Point2f a, cv::Point2f b) {
-	return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
-}
 
 void sortPts(std::vector<cv::Point2f> &points) {
 	std::sort(points.begin(), points.end(),
@@ -265,11 +258,12 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,
 			}
 
 			centers.push_back(center);
-			for (auto &armor : armors) {
-				if (armor.getCode() == code) {
-				}
-			}
-			armors.push_back(ArmorDescriptor(points, code));
+			auto armor = ArmorDescriptor(points, code);
+			cv::Mat rot,t;
+			solver.solve(armor, rot, t);
+			cv::Point3d p = {t.at<double>(0), t.at<double>(1), t.at<double>(2)};
+			armor.set3DPoint(p);
+			armors.push_back(armor);
 
 			points.clear();
 		}

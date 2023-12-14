@@ -19,15 +19,16 @@ class ArmorDescriptor {
 	enum ArmorType { NormalArmor, LargeArmor };
 
 	ArmorType getArmorType() { return armorType; }
-
-	std::vector<cv::Point2f> getPoints() { return pts; }
-
+	std::vector<cv::Point2f> getPoints() const { return pts; }
+	cv::Point3d get3DPoint() const {return _3dpts;}
 	cv::Point2f getCenter() { return center; }
-
 	int getCode() { return code; }
+
+	void set3DPoint(cv::Point3d _3dpts) { this->_3dpts = _3dpts; }
 
    private:
 	std::vector<cv::Point2f> pts;
+	cv::Point3d _3dpts;
 	ArmorType armorType;
 	cv::Point2f center;
 	int code;

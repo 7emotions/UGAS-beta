@@ -3,16 +3,27 @@
 
 #pragma once
 
+#include <opencv2/core/types.hpp>
 #include <opencv2/opencv.hpp>
 
 #include "ArmorDescriptor/ArmorDescriptor.h"
 #include "Identify/NumberIdentify.h"
+#include "PnPSolver/PnPSolver.h"
 
 const int minArea = 5;
 const int minContoursSize = 1;
 const double lightLengthRatio = 4.0;
 const double minAngleDiff = 15.0;
 const double minLengthDiffRatio = 0.8;
+
+inline double crossProduct(cv::Point2f a, cv::Point2f b) {
+	return a.x * b.y - a.y * b.x;
+}
+ 
+template <typename T>
+inline double EuDis(T a, T b={0}) {
+	return cv::norm(a-b);
+}
 
 class Detector {
    public:
@@ -27,4 +38,5 @@ class Detector {
 
    private:
 	NumberIdentify identifier;
+	PnPSolver solver;
 };

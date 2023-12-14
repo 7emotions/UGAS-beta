@@ -1,8 +1,10 @@
 #include <unistd.h>
 
+#include <algorithm>
 #include <iostream>
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/mat.hpp>
+#include <opencv2/core/types.hpp>
 #include <opencv2/core/utility.hpp>
 #include <opencv2/highgui.hpp>
 #include <vector>
@@ -32,6 +34,8 @@ int main() {
 		if (img.empty()) {
 			std::cout << "Empty image." << std::endl;
 			return 1;
+			std::cout << "Empty image." << std::endl;
+			return 1;
 		}
 
 		detector.DetectLights(img, tag, armors);
@@ -41,13 +45,14 @@ int main() {
 			pan.aim();
 		}
 
-		for (auto armor : armors) {
-			if (armor.getCode() != 10 && armor.getCode() != 4) {
-				pan.aim();
-				continue;
-			}
-			pan.aim(armor);
-		}
+		std::sort(armors.begin(), armors.end(), [](const ArmorDescriptor &a, const ArmorDescriptor &b){
+			auto d1 = EuDis(a.get3DPoint());
+			auto d2 = EuDis(b.get3DPoint());
+			return d1 < d2;
+		});
+
+		pan.aim(armors[0]);
+
 		usleep(1000 * 10);
 	}
 

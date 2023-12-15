@@ -7,18 +7,8 @@
 #include <vector>
 
 #include "ArmorDescriptor/ArmorDescriptor.h"
-#include "PnPSolver/Parameters.h"
+#include "Parameters/Parameters.h"
 
-namespace param {
-double CameraMatrixData6[3][3] = {
-	{1.722231837421459e+03, 0, 7.013056440882832e+02},
-	{0, 1.724876404292754e+03, 5.645821718351237e+02},
-	{0, 0, 1}};
-double CameraDistCoeffsData6[5] = {-0.064232403853946, -0.087667493884102, 0, 0,
-								   0.792381808294582};
-const cv::Mat CameraMatrix6(3, 3, CV_64FC1, CameraMatrixData6);
-const cv::Mat CameraDistCoeffs6(1, 5, CV_64FC1, CameraDistCoeffsData6);
-}  // namespace param
 
 void PnPSolver::solve(ArmorDescriptor armor, cv::Mat &rot, cv::Mat &trans) {
 	std::vector<cv::Point3d> object =

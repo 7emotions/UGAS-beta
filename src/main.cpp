@@ -14,6 +14,8 @@
 #include "HikCamera/HikCamera.h"
 #include "PanTiltUtil/PanTilt.h"
 
+#define _IGNORE_CODE_CONFIDENCE
+
 int main() {
 	HikCamera camera;
 	Detector detector;
@@ -38,7 +40,7 @@ int main() {
 			return 1;
 		}
 
-		detector.DetectLights(img, tag, armors);
+		detector.DetectArmors(img, tag, armors);
 		std::cout << "[Armors] Size:" << armors.size() << std::endl;
 
 		if (armors.empty()) {

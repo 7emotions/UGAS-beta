@@ -1,3 +1,13 @@
+/**
+ * @file LightDescriptor.h
+ * @author Lorenzo Feng (lorenzo.feng@njust.edu.cn)
+ * @brief 灯条描述
+ * @version 0.1
+ * @date 2023-12-15
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/types.hpp>
@@ -28,23 +38,19 @@ class LightDescriptor {
 		}
 	}
 
-	void pnpPts(std::vector<cv::Point2f> &pnpPts, bool flag = LEFT) {
-		if (flag) {
-			pnpPts.push_back(center + length / 2 * v);
-			pnpPts.push_back(center - length / 2 * v);
-		} else {
-			pnpPts.push_back(center + length / 2 * v);
-			pnpPts.push_back(center - length / 2 * v);
-		}
+	/**
+	 * @brief 将
+	 * 
+	 * @param pnpPts 
+	 * @param flag 
+	 */
+	void pnpPts(std::vector<cv::Point2f> &pnpPts) {
+		pnpPts.push_back(center + length / 2 * v);
+		pnpPts.push_back(center - length / 2 * v);
 	}
 
-	void extend(std::vector<cv::Point2f> &points, double ml, bool flag = LEFT) {
-		if (flag) {
-			points.push_back(center + ml * 120 / 56 / 2 * v);  // TL
-			points.push_back(center - ml * 120 / 56 / 2 * v);  // BL
-		} else {
-			points.push_back(center + ml * 120 / 56 / 2 * v);  // TR
-			points.push_back(center - ml * 120 / 56 / 2 * v);  // BR
-		}
+	void extend(std::vector<cv::Point2f> &points, double ml) {
+		points.push_back(center + ml * 120 / 56 / 2 * v);
+		points.push_back(center - ml * 120 / 56 / 2 * v);
 	}
 };

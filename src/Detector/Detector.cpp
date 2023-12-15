@@ -20,7 +20,17 @@
 #include "ArmorDescriptor/ArmorDescriptor.h"
 #include "LightDescriptor/LightDescriptor.h"
 
+/**
+ * @brief 特征点群的约束顺序
+ *
+ */
+enum PtsOder { BR, BL, TR, TL };
 
+/**
+ * @brief 对特征点群进行排序，使其顺序与枚举类PtsOder相匹配
+ *
+ * @param points
+ */
 void sortPts(std::vector<cv::Point2f> &points) {
 	std::sort(points.begin(), points.end(),
 			  [](const cv::Point2f &a, const cv::Point2f &b) {
@@ -74,8 +84,15 @@ void sortPts(std::vector<cv::Point2f> &points) {
 	points.push_back(tr);
 	points.push_back(br);
 }
-enum { BR, BL, TR, TL };
 
+/**
+ * @brief
+ * 透视变换img并返回变换后的roi，其中特征点群points顺序应当与枚举类PtsOder相匹配
+ *
+ * @param img
+ * @param points 特征点群
+ * @param roi
+ */
 void perspective(cv::Mat &img, std::vector<cv::Point2f> &points, cv::Mat &roi) {
 	auto leftHeight = EuDis(points[TL], points[BL]);
 	auto rightHeight = EuDis(points[TR], points[BR]);
@@ -96,6 +113,13 @@ void perspective(cv::Mat &img, std::vector<cv::Point2f> &points, cv::Mat &roi) {
 	cv::warpPerspective(img, roi, affineMat, cv::Point(maxWidth, maxHeight));
 }
 
+/**
+ * @brief 图像预处理，包括通道分离、环境光屏蔽、二值化、高斯滤波与膨胀
+ *
+ * @param img
+ * @param tagToDetect
+ * @return cv::Mat
+ */
 cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 	cv::Mat channels[3];
 	cv::Mat binary, gaussian, dilate;
@@ -113,7 +137,16 @@ cv::Mat Detector::preprocess(cv::Mat img, COLOR_TAG tagToDetect) {
 	std::vector<cv::Point2f> points;
 }
 
-cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,
+/**
+ * @brief
+ * 匹配平行的灯条，并识别其中图像，若被识别成装甲板，则将其放入容器armors。匹配机制参照/doc/UGAS_Beta.pdf
+ *
+ * @param img 原图像
+ * @param color_tag 要识别的颜色标记
+ * @param armors 装甲板容器
+ * @return cv::Mat 框选后的图片
+ */
+cv::Mat Detector::DetectArmors(cv::Mat img, COLOR_TAG color_tag,
 							   std::vector<ArmorDescriptor> &armors) {
 	cv::Point2i origin(img.cols / 2, img.rows / 2);
 
@@ -126,7 +159,9 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,
 
 	cv::Mat pre = preprocess(img, color_tag);
 
-	// cv::imshow("pre",pre);
+#ifdef _DEBUG_IMSHOW_PRE
+	cv::imshow("pre", pre);
+#endif
 	cv::findContours(pre, contours, hierarchy, cv::RETR_TREE,
 					 cv::CHAIN_APPROX_NONE, cv::Point());
 
@@ -191,27 +226,24 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,
 			}
 
 			std::vector<cv::Point2f> points;
-			lights[i].extend(points, ml,
-							 lights[i].center.x < lights[j].center.x
-								 ? LightDescriptor::LEFT
-								 : LightDescriptor::RIGHT);
-			lights[j].extend(points, ml,
-							 lights[i].center.x < lights[j].center.x
-								 ? LightDescriptor::RIGHT
-								 : LightDescriptor::LEFT);
+			lights[i].extend(points, ml);
+			lights[j].extend(points, ml);
 
 			sortPts(points);
 
-			// cv::Mat frame=img.clone();
-			// cv::putText(frame, "TL", points[TL], cv::FONT_HERSHEY_SIMPLEX, 2,
-			// cv::Scalar(0,255,0)); cv::putText(frame, "TR", points[TR],
-			// cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
-			// cv::putText(frame, "BL", points[BL], cv::FONT_HERSHEY_SIMPLEX, 2,
-			// cv::Scalar(0,255,0)); cv::putText(frame, "BR", points[BR],
-			// cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
+#ifdef _DEBUG_IMSHOW_LTS
+			cv::Mat frame = img.clone();
+			cv::putText(frame, "TL", points[TL], cv::FONT_HERSHEY_SIMPLEX, 2,
+						cv::Scalar(0, 255, 0));
+			cv::putText(frame, "TR", points[TR], cv::FONT_HERSHEY_SIMPLEX, 2,
+						cv::Scalar(0, 255, 0));
+			cv::putText(frame, "BL", points[BL], cv::FONT_HERSHEY_SIMPLEX, 2,
+						cv::Scalar(0, 255, 0));
+			cv::putText(frame, "BR", points[BR], cv::FONT_HERSHEY_SIMPLEX, 2,
+						cv::Scalar(0, 255, 0));
 
-			// cv::imshow("frame", frame);
-
+			cv::imshow("frame", frame);
+#endif
 			cv::Mat roi;
 			perspective(img, points, roi);
 
@@ -226,42 +258,50 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,
 
 			points.clear();
 
-			lights[i].pnpPts(points, lights[i].center.x < lights[j].center.x
-										 ? LightDescriptor::LEFT
-										 : LightDescriptor::RIGHT);
-			lights[j].pnpPts(points, lights[i].center.x < lights[j].center.x
-										 ? LightDescriptor::RIGHT
-										 : LightDescriptor::LEFT);
+			lights[i].pnpPts(points);
+			lights[j].pnpPts(points);
 
 			sortPts(points);
-			// cv::Mat frame=img.clone();
-			// cv::putText(frame, "TL", points[TL], cv::FONT_HERSHEY_SIMPLEX, 2,
-			// cv::Scalar(0,255,0)); cv::putText(frame, "TR", points[TR],
-			// cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
-			// cv::putText(frame, "BL", points[BL], cv::FONT_HERSHEY_SIMPLEX, 2,
-			// cv::Scalar(0,255,0)); cv::putText(frame, "BR", points[BR],
-			// cv::FONT_HERSHEY_SIMPLEX, 2, cv::Scalar(0,255,0));
 
-			// cv::imshow("frame", frame);
+#ifdef _DEBUG_IMSHOW_PNP_PTS
+			cv::Mat frame = img.clone();
+			cv::putText(frame, "TL", points[TL], cv::FONT_HERSHEY_SIMPLEX, 2,
+						cv::Scalar(0, 255, 0));
+			cv::putText(frame, "TR", points[TR], cv::FONT_HERSHEY_SIMPLEX, 2,
+						cv::Scalar(0, 255, 0));
+			cv::putText(frame, "BL", points[BL], cv::FONT_HERSHEY_SIMPLEX, 2,
+						cv::Scalar(0, 255, 0));
+			cv::putText(frame, "BR", points[BR], cv::FONT_HERSHEY_SIMPLEX, 2,
+						cv::Scalar(0, 255, 0));
 
+			cv::imshow("frame", frame);
+#endif
 			cv::line(img, points[TL], points[TR], cv::Scalar(0, 255, 0));
 			cv::line(img, points[TR], points[BR], cv::Scalar(0, 255, 0));
 			cv::line(img, points[BR], points[BL], cv::Scalar(0, 255, 0));
 			cv::line(img, points[BL], points[TL], cv::Scalar(0, 255, 0));
 
-			// cv::putText(img, std::to_string(code), center, );
+#ifdef _DEBUG_IMSHOW_CODE
+			cv::putText(img, std::to_string(code), center, );
+#endif
 			std::cout << "Code: " << code << "\tConfidence: " << confidence
 					  << std::endl;
 
-			if (code == 0) {  //|| confidence < 0.65) {
+#ifdef _IGNORE_CODE_CONFIDENCE 
+			if (code == 0 )
+#else
+			if (code == 0 || confidence < 0.65)
+#endif
+			{
 				continue;
 			}
 
 			centers.push_back(center);
 			auto armor = ArmorDescriptor(points, code);
-			cv::Mat rot,t;
+			cv::Mat rot, t;
 			solver.solve(armor, rot, t);
-			cv::Point3d p = {t.at<double>(2), -t.at<double>(0), -t.at<double>(1)};
+			cv::Point3d p = {t.at<double>(2), -t.at<double>(0),
+							 -t.at<double>(1)};
 			armor.set3DPoint(p);
 			armors.push_back(armor);
 

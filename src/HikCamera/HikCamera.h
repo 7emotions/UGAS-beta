@@ -1,3 +1,13 @@
+/**
+ * @file HikCamera.h
+ * @author Lorenzo Feng (lorenzo.feng@njust.edu.cn)
+ * @brief 海康威视SDK 二次封装
+ * @version 0.1
+ * @date 2023-12-15
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 
 #include <cstddef>
@@ -8,8 +18,9 @@
 #include "CameraParams.h"
 #include "MvCameraControl.h"
 #include "MvErrorDefine.h"
+#include "HikCamera/HikCameraInterface.h"
 
-class HikCamera {
+class HikCamera : HikCameraInterface{
    public:
 	HikCamera() = default;
 	~HikCamera() {

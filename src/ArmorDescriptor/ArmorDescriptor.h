@@ -1,3 +1,13 @@
+/**
+ * @file ArmorDescriptor.h
+ * @author Lorenzo Feng (lorenzo.feng@njust.edu.cn)
+ * @brief 装甲板描述类
+ * @version 0.1
+ * @date 2023-12-15
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 
 #include <opencv2/core/types.hpp>

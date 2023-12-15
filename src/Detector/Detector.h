@@ -1,6 +1,13 @@
-﻿// Detector.h: 标准系统包含文件的包含文件
-// 或项目特定的包含文件。
-
+﻿/**
+ * @file Detector.h
+ * @author Lorenzo Feng (lorenzo.feng@njust.edu.cn)
+ * @brief 装甲板检测器
+ * @version 0.1
+ * @date 2023-12-15
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 
 #include <opencv2/core/types.hpp>
@@ -33,7 +40,7 @@ class Detector {
 	~Detector() = default;
 
 	cv::Mat preprocess(cv::Mat img, COLOR_TAG tag);
-	cv::Mat DetectLights(cv::Mat img, COLOR_TAG tag,
+	cv::Mat DetectArmors(cv::Mat img, COLOR_TAG tag,
 						 std::vector<ArmorDescriptor> &armors);
 
    private:

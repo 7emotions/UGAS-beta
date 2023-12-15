@@ -7,6 +7,11 @@ void PanTiltUtil::aim(ArmorDescriptor armor) {
 	aim(p);
 }
 
+/**
+ * @brief 令云台瞄准点pos
+ * 
+ * @param pos 
+ */
 void PanTiltUtil::aim(cv::Point3d pos){
 	auto yaw = -atanf(-pos.y / pos.x) * 180.0 / CV_PI;
 	auto pitch = -atanf(pos.z / pos.x) * 180.0 / CV_PI;

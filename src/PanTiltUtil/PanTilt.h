@@ -1,3 +1,13 @@
+/**
+ * @file PanTilt.h
+ * @author Lorenzo Feng (lorenzo.feng@njust.edu)
+ * @brief 云台控制类
+ * @version 0.1
+ * @date 2023-12-15
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #pragma once
 
 #include "ArmorDescriptor/ArmorDescriptor.h"

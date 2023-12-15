@@ -51,7 +51,7 @@ int main() {
 			return d1 < d2;
 		});
 
-		pan.aim(armors[0]);
+		pan.aim(armors[0].get3DPoint());
 
 		usleep(1000 * 10);
 	}

@@ -10,6 +10,7 @@ class PanTiltUtil {
 	~PanTiltUtil() = default;
 
 	void aim(ArmorDescriptor armor);
+	void aim(cv::Point3d pos);
 	void aim() {
 		sender.pack(0, 0, 0, 0, 0);
 		sender.send();

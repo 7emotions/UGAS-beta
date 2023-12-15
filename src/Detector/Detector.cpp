@@ -261,7 +261,7 @@ cv::Mat Detector::DetectLights(cv::Mat img, COLOR_TAG color_tag,
 			auto armor = ArmorDescriptor(points, code);
 			cv::Mat rot,t;
 			solver.solve(armor, rot, t);
-			cv::Point3d p = {t.at<double>(0), t.at<double>(1), t.at<double>(2)};
+			cv::Point3d p = {t.at<double>(2), -t.at<double>(0), -t.at<double>(1)};
 			armor.set3DPoint(p);
 			armors.push_back(armor);
 

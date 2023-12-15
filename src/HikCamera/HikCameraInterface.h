@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-12-15
  *
- * @copyright Copyright (c) 2023
+ * @copyright 南京理工大学 Alliance
  * 
  */
 #pragma once

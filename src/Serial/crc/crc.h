@@ -1,3 +1,14 @@
+/**
+ * @file crc.h
+ * @author Lorenzo Feng (lorenzo.feng@njust.edu.cn)
+ * @brief CRC校验封装
+ * @version 0.1
+ * @date 2023-12-15
+ * 
+ * @copyright 南京理工大学 Alliance
+ * 
+ */
+
 #pragma once
 
 #include <cstdint>

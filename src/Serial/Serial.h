@@ -1,3 +1,13 @@
+/**
+ * @file Serial.h
+ * @author Lorenzo Feng (lorenzo.feng@njust.edu.cn)
+ * @brief 串口封装
+ * @version 0.1
+ * @date 2023-12-15
+ * 
+ * @copyright 南京理工大学 Alliance
+ * 
+ */
 #pragma once
 
 #include <fcntl.h>
@@ -11,8 +21,13 @@
 
 ;
 #pragma pack(push, 1)
+/**
+ * @brief 串口通讯数据包
+ * 
+ */
 typedef struct PackageInfo {
 	float yaw, pitch;		  // 0，4
+	// roi
 	uint16_t rect_x, rect_y;  // 8, 10
 	uint8_t color;			  // 12 13 16
 } Package;
@@ -33,7 +48,7 @@ class SerialUtil {
 	~SerialUtil() { close(serial); }
 
 	/**
-	 * @brief pack date
+	 * @brief 打包数据
 	 *
 	 * @param yaw uint in degree
 	 * @param pitch uint in degree
@@ -41,8 +56,8 @@ class SerialUtil {
 	 * @param rect_y roi_y
 	 * @param color color to detect
 	 */
-	void pack(float yaw, float pitch, uint16_t rect_x, uint16_t rect_y,
-			  uint8_t color) {
+	void pack(float yaw = 0, float pitch = 0, uint16_t rect_x = 0, uint16_t rect_y = 0,
+			  uint8_t color = 0) {
 		package.yaw = yaw;
 		package.pitch = pitch;
 		package.rect_x = rect_x;
@@ -50,6 +65,10 @@ class SerialUtil {
 		package.color = color;
 	}
 
+	/**
+	 * @brief 发送前需要先使用pack打包数据
+	 * 
+	 */
 	void send();
 
    protected:

@@ -18,7 +18,7 @@ void projectTransform(cv::Point3d &org, cv::Point2d &dst) {
 inline void motionCalculate(double &error, cv::Point2d pos, double v,
 							double pitch) {
 	error = pos.x * tan(pitch) -
-			param::G * pos.x * pos.x / (2.0 * v * v * cos(pitch) * cos(pitch)) -
+			param::TrajectoryStaticDate::G * pos.x * pos.x / (2.0 * v * v * cos(pitch) * cos(pitch)) -
 			pos.y;
 }
 

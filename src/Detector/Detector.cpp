@@ -19,6 +19,9 @@
 
 #include "ArmorDescriptor/ArmorDescriptor.h"
 #include "LightDescriptor/LightDescriptor.h"
+#include "Parameters/Parameters.h"
+
+using namespace param::DetectorStaticDate;
 
 /**
  * @brief 特征点群的约束顺序
@@ -187,7 +190,7 @@ cv::Mat Detector::DetectArmors(cv::Mat img, COLOR_TAG color_tag,
 
 	for (size_t i = 0; i < lights.size(); i++) {
 		for (size_t j = i + 1; j < lights.size(); j++) {
-			bool loopFlag = true;
+			bool loopFlag = true; // 重复标志
 			auto center = (lights[i].center + lights[j].center) / 2;
 			for (size_t i = 0; i < centers.size(); i++) {
 				if (EuDis(center, centers[i]) < 10) {
@@ -208,20 +211,20 @@ cv::Mat Detector::DetectArmors(cv::Mat img, COLOR_TAG color_tag,
 			auto rpd = abs(lights[i].length - lights[j].length) /
 					   std::max(lights[i].length, lights[j].length);
 
-			if (rpd > 0.8) {
+			if (rpd > minPeakDiffRatio) {
 				continue;
 			}
 
 			auto rdfm = abs(lights[i].length - lights[j].length) / ml;
 
-			if (rdfm > 0.5) {
+			if (rdfm > minMeanDiffRatio) {
 				continue;
 			}
 
 			auto distance = EuDis(lights[i].center, lights[j].center);
 			auto rdsm = distance / ml;
 
-			if (rdsm > 3.5 || rdsm < 0.5) {
+			if (rdsm > minDisMeanRatio || rdsm < maxDisMeanRatio) {
 				continue;
 			}
 

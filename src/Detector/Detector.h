@@ -17,12 +17,6 @@
 #include "Identify/NumberIdentify.h"
 #include "PnPSolver/PnPSolver.h"
 
-const int minArea = 5;
-const int minContoursSize = 1;
-const double lightLengthRatio = 4.0;
-const double minAngleDiff = 15.0;
-const double minLengthDiffRatio = 0.8;
-
 inline double crossProduct(cv::Point2f a, cv::Point2f b) {
 	return a.x * b.y - a.y * b.x;
 }

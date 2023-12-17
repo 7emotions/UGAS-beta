@@ -26,6 +26,8 @@ class Trajectory {
 	cv::Point3d solve(cv::Point3d pos, double v);
 
    private:
+	void projectTransform(cv::Point3d &org, cv::Point2d &dst);
+
 	cv::Point3d _cameraOffset;
 	float _gunpointOffset;
 };

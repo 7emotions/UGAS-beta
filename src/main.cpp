@@ -13,6 +13,8 @@
 #include "Detector/Detector.h"
 #include "HikCamera/HikCamera.h"
 #include "PanTiltUtil/PanTilt.h"
+#include "Parameters/Parameters.h"
+#include "Trajectory/Trajectory.h"
 
 #define _IGNORE_CODE_CONFIDENCE
 
@@ -21,6 +23,8 @@ int main() {
 	Detector detector;
 	std::vector<ArmorDescriptor> armors;
 	PanTiltUtil pan;
+	auto trajectoryStaticDate = param::TrajectoryStaticDate::ODWhellDescriptor;
+	Trajectory trajectoryCalculator(trajectoryStaticDate.getGunpointOffset(),trajectoryStaticDate.getCameraPosition());
 	cv::Mat img;
 
 	if (!camera.connectDeivce()) {
@@ -53,7 +57,8 @@ int main() {
 			return d1 < d2;
 		});
 
-		pan.aim(armors[0].get3DPoint());
+		auto v = 30.0;
+		pan.aim(trajectoryCalculator.solve(armors[0].get3DPoint(), v));
 
 		usleep(1000 * 10);
 	}

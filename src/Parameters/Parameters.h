@@ -5,13 +5,15 @@
  * @version 0.1
  * @date 2023-12-15
  * 
- * @copyright 南京理工大学 Alliance
+ * @copyright Alliance, Nan Jing University of Science & Technology
  * 
  */
 #pragma once
 
 #include <opencv2/core/mat.hpp>
+#include <opencv2/core/types.hpp>
 #include <opencv2/opencv.hpp>
+#include "RoboticDescriptor/RoboticDescriptor.h"
 
 namespace param {
 /**
@@ -67,4 +69,16 @@ const cv::Mat CameraMatrix6(3, 3, CV_64FC1, CameraMatrixData6);
  *
  */
 const cv::Mat CameraDistCoeffs6(1, 5, CV_64FC1, CameraDistCoeffsData6);
+
+const float G = 9.8;
+
+/**
+ * @brief 弹道解算静态数据
+ * 
+ */
+namespace TrajectoryStaticDate {
+	//ODWhell
+	const RoboticDescriptor ODWhellDescriptor(5, "全向轮",0.1552,cv::Point3d(0.1055,0.043,0));
+}
+
 };	// namespace param

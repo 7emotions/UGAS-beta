@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-12-15
  *
- * @copyright 南京理工大学 Alliance
+ * @copyright Alliance, Nan Jing University of Science & Technology
  *
  */
 
@@ -18,12 +18,14 @@ class Trajectory {
 	/**
 	 * @brief Construct a new Trajectory object
 	 * 
-	 * @param offset 光轴与
+	 * @param offset 云台原点到枪口的偏差
+	 * @param posture 在云台参考系下,光心参考系的坐标
 	 */
-	Trajectory(cv::Point3d offset) : _offset(offset) {}
+	Trajectory(float offset, cv::Point3d position) : _cameraOffset(position), _gunpointOffset(offset){}
 
 	cv::Point3d solve(cv::Point3d pos, double v);
 
    private:
-	cv::Point3d _offset;
+	cv::Point3d _cameraOffset;
+	float _gunpointOffset;
 };

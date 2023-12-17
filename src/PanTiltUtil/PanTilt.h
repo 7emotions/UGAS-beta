@@ -5,11 +5,12 @@
  * @version 0.1
  * @date 2023-12-15
  * 
- * @copyright 南京理工大学 Alliance
+ * @copyright Alliance, Nan Jing University of Science & Technology
  * 
  */
 #pragma once
 
+#include <opencv2/core/types.hpp>
 #include "ArmorDescriptor/ArmorDescriptor.h"
 #include "PnPSolver/PnPSolver.h"
 #include "Serial/Serial.h"
@@ -20,6 +21,7 @@ class PanTiltUtil {
 	~PanTiltUtil() = default;
 
 	void aim(ArmorDescriptor armor);
+	void aim(float yaw, float pitch);
 	void aim(cv::Point3d pos);
 	void aim() {
 		sender.pack();

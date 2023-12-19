@@ -30,12 +30,12 @@ $$
 \left\{\begin{matrix}\\
 	s = \sqrt{x^2+y^2} \\
 	\\
-	z'_{n-1} = s \tan \theta_{n-1}-\displaystyle\frac{sg\sec^2\theta_{n-1}}{2v_0^2}\\
+	z'_{n-1} = s \tan \theta_{n-1}-\displaystyle\frac{gs^2\sec^2\theta_{n-1}}{2v_0^2}\\
 	\\
 	e_{n-1} = z'_{n-1} - z
 	\\
 	\\
-	\theta_n = \arctan\displaystyle\frac{z - e_{n-1}}{s}\\
+	\theta_n = \arctan\displaystyle\frac{z'_{n-1} - e_{n-1}}{s}\\
 	\\
 	\theta_0 = \arctan\displaystyle\frac{z}{s}\\
 	\\
@@ -44,3 +44,8 @@ $$
 $$
 
 Among them, $\displaystyle e_n$ is used to represent the estimation of error.
+
+With the iterative method, the following graphical results could be given, which indicate that the error can converge to 0 within ten iterations.
+
+![error](error.png)
+![count](count.png)

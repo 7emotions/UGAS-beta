@@ -16,14 +16,14 @@
 #include <opencv2/core/base.hpp>
 
 #include "CameraParams.h"
+#include "HikCamera/HikCameraInterface.h"
 #include "MvCameraControl.h"
 #include "MvErrorDefine.h"
-#include "HikCamera/HikCameraInterface.h"
 
-class HikCamera : HikCameraInterface{
+class HikCamera : public HikCameraInterface{
    public:
-	HikCamera() = default;
-	~HikCamera() {
+	explicit HikCamera() = default;
+	~HikCamera() override {
 		if (!isConnected) {
 			return;
 		}
@@ -44,9 +44,9 @@ class HikCamera : HikCameraInterface{
 		}
 	}
 
-	bool isUSEDevice(MV_CC_DEVICE_INFO *pstMVCCDI);
-	bool connectDeivce();
-	cv::Mat fetchFrame();
+	bool isUSEDevice(MV_CC_DEVICE_INFO *pstMVCCDI) override;
+	bool connectDeivce() override;
+	cv::Mat fetchFrame() override;
 
    private:
 	int nRet = MV_OK;

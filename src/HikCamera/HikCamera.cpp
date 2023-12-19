@@ -22,7 +22,7 @@ bool HikCamera::isUSEDevice(MV_CC_DEVICE_INFO *pstMVCCDI) {
 	return false;
 }
 
-bool HikCamera::connectDeivce() {
+bool HikCamera::connectDeivce()  {
 	MV_CC_DEVICE_INFO_LIST stDeviceList;
 	memset(&stDeviceList, 0, sizeof(MV_CC_DEVICE_INFO_LIST));
 

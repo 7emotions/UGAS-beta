@@ -6,7 +6,7 @@
  * @date 2023-12-15
  *
  * @copyright Alliance, Nan Jing University of Science & Technology
- * 
+ *
  */
 #pragma once
 
@@ -16,7 +16,8 @@
 
 class HikCameraInterface {
    public:
-	virtual bool isUSEDevice(MV_CC_DEVICE_INFO *pstMVCCDI);
-	virtual bool connectDeivce();
-	virtual cv::Mat fetchFrame();
+	virtual ~HikCameraInterface() = default;
+	virtual bool isUSEDevice(MV_CC_DEVICE_INFO *pstMVCCDI) = 0;
+	virtual bool connectDeivce() = 0;
+	virtual cv::Mat fetchFrame() = 0;
 };

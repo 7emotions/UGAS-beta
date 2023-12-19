@@ -1,3 +1,4 @@
+
 /**
  * @file PnPSolver.h
  * @author Lorenzo Feng (lorenzo.feng@njust.edu.cn)
@@ -22,9 +23,9 @@ class PnPSolver {
 	/**
 	 * @brief PnP解算，根据armor的pts（2D）得到旋转矩阵rot与平移矩阵t
 	 *
-	 * @param armor
-	 * @param rot
-	 * @param t
+	 * @param armor 装甲板对象
+	 * @param rot 刚体旋转变换矩阵
+	 * @param t 刚体平移变换矩阵
 	 */
 	void solve(ArmorDescriptor armor, cv::Mat &rot, cv::Mat &t);
 

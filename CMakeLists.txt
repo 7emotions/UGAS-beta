@@ -12,17 +12,33 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
+
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # Set the output executable file name:
 # When compiling in the ROS environment, the output executable file name will be the node name.
 # Otherwise, the output file name will be the project name.
-set(EXECUTABLE_NAME ${PROJECT_NAME})
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
+set(EXECUTABLE_NAME ugas_ros)
+# set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 
-# Find non-ros packages
+find_package(ament_cmake REQUIRED)
 find_package(OpenCV 4.7 REQUIRED)
 find_package(HikCameraSDK REQUIRED)
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  # the following line skips the linter which checks for copyrights
+  # comment the line when a copyright and license is added to all source files
+  set(ament_cmake_copyright_FOUND TRUE)
+  # the following line skips cpplint (only works in a git repo)
+  # comment the line when this package is in a git repo and when
+  # a copyright and license is added to all source files
+  set(ament_cmake_cpplint_FOUND TRUE)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
+
 
 # Include project source directory
 include_directories(${PROJECT_SOURCE_DIR}/src ${CONFIGURE_DIR_PATH})
@@ -36,5 +52,17 @@ file(GLOB_RECURSE UGAS_SOURCE CONFIGURE_DEPENDS
 # Find ros packages & add source files to compilation
 add_executable(${EXECUTABLE_NAME} ${UGAS_SOURCE})
 
+target_include_directories(ugas_ros PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_features(ugas_ros PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+
+install(TARGETS ugas_ros
+  DESTINATION lib/${PROJECT_NAME})
+
+
 # Link libraries
 target_link_libraries(${EXECUTABLE_NAME} ${OpenCV_LIBS} ${HikCameraSDK_LIB} ${OpenVINO_LIB} -lpthread)
+
+
+ament_package()

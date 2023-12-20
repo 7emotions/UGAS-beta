@@ -52,6 +52,9 @@ int main() {
 		std::cout << "Solving..." << std::endl;
 
 		trajectoryCalculator.solve(target, v, count, error);
+
+		
+
 		std::cout << "Target:" << i << "\tdone."<< std::endl;
 
 		fp << i << "," << count << "," << error << std::endl;

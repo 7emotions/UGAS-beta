@@ -1,0 +1,7 @@
+build/
+.vscode/
+.vscode/c_cpp_properties.json
+.git/
+.cache/
+log
+install

@@ -23,6 +23,8 @@ set(EXECUTABLE_NAME ugas_ros)
 # set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
 
 find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(OpenCV 4.7 REQUIRED)
 find_package(HikCameraSDK REQUIRED)
 
@@ -51,6 +53,7 @@ file(GLOB_RECURSE UGAS_SOURCE CONFIGURE_DEPENDS
 
 # Find ros packages & add source files to compilation
 add_executable(${EXECUTABLE_NAME} ${UGAS_SOURCE})
+ament_target_dependencies(${EXECUTABLE_NAME} rclcpp std_msgs)
 
 target_include_directories(ugas_ros PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

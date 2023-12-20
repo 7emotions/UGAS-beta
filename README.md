@@ -4,9 +4,23 @@
 
 The goal of UGAS-beta is to help to automatically aim.
 
-## Installation
+## Archtecture
 
-### HikCamera SDK
+- ### doc
+
+The document dictionary of the project. Mechanism such as PnP Solution, Trajectory Solution and Armors Filter are included.
+
+- ### src
+
+The source code of the project.
+
+- ### model
+
+The model dictionary of number identification neural network.
+
+## Third Party Dependencies
+
+- ### HikCamera SDK
 
 1. Visit [MVS](https://www.hikrobotics.com/cn/machinevision/service/download?module=0) to download the HikVision MVS.
 2. Then unzip it and cd into the folder.
@@ -15,9 +29,9 @@ The goal of UGAS-beta is to help to automatically aim.
 4. Run the command blow to run MVS.
 	`sudo /opt/MVS/bin/MVS.sh`
 
-PS: Adding its lib to PATH is NOT recommended, for it may cause some conflicts with Qt.
+PS: Adding its lib to PATH is NOT recommended, for it may cause some conflicts with other applications.
 
-### OpenCV
+- ### OpenCV
 
 1. Visit [OpenCV](https://opencv.org/releases/) to download the latest version of OpenCV.
 2. Then unzip it and cd into the folder.
@@ -38,18 +52,7 @@ PS: Adding its lib to PATH is NOT recommended, for it may cause some conflicts w
 
 ## Usage
 
-### UGAS-beta
-
-1. Clone this repo.
-2. Run the command blow to complie.
-
-```
-	cd UGAS-beta
-	mkdir build
-	cd build
-	cmake ..
-	make
-```
-3. Run `./ugas-beta` to run it.
 
 
+## Contributors
+- [@Lorenzo Feng](https://github.com/7emotions)

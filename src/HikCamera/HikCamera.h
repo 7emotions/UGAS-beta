@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2023-12-15
  * 
- * @copyright Alliance, Nan Jing University of Science & Technology
+ * @copyright Copyright (c) Alliance, Nan Jing University of Science & Technology
  * 
  */
 #pragma once

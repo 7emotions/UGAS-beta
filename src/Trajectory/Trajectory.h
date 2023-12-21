@@ -6,7 +6,8 @@
  * @version 0.1
  * @date 2023-12-15
  *
- * @copyright Copyright (c) Alliance, Nan Jing University of Science & Technology
+ * @copyright Copyright (c) Alliance, Nan Jing University of Science &
+ * Technology
  *
  */
 
@@ -27,26 +28,25 @@ class Trajectory {
 
 	/**
 	 * @brief 弹道解算
-	 * 
+	 *
 	 * @param pos 目标
 	 * @param v 初速度
 	 * @param count 解算迭代次数
 	 * @param err 解算误差
 	 * @return cv::Point3d 补偿点
 	 */
-	cv::Point3d solve(cv::Point3d pos, double v, size_t &count, double& err);
+	cv::Point3d solve(cv::Point3d pos, double v, size_t &count, double &err);
 
    protected:
 	/**
 	 * @brief 抛体运动计算
-	 * 
+	 *
 	 * @param error 误差
 	 * @param pos 目标
 	 * @param v 初速度
 	 * @param pitch 抛射角
 	 */
-	void errorCalculate(double &error, cv::Point2d pos, double v,
-						 double pitch);
+	void errorCalculate(double &error, cv::Point2d pos, double v, double pitch);
 
    private:
 	void projectTransform(cv::Point3d &org, cv::Point2d &dst);

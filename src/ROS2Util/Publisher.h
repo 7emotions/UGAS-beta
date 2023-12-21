@@ -9,4 +9,7 @@
  * 
  */
 
- 
+ #include <rclcpp/node.hpp>
+class RoSPublisher : public rclcpp::Node{
+
+};

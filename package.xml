@@ -3,7 +3,11 @@
 <package format="3">
   <name>ugas-beta</name>
   <version>0.0.0</version>
-  <description>UGAS with ros2</description>
+  <description>
+    UGAS with ros2
+    package name : ugas-beta
+    node name : ugas-ros
+  </description>
   <maintainer email="lorenzo.feng@njust.edu.cn">alliance</maintainer>
   <license>GPL v3</license>
 

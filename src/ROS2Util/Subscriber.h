@@ -5,7 +5,8 @@
  * @version 0.1
  * @date 2023-12-20
  *
- * @copyright Copyright (c) Alliance, Nan Jing University of Science & Technology
+ * @copyright Copyright (c) Alliance, Nan Jing University of Science &
+ * Technology
  *
  */
 #pragma once
@@ -15,23 +16,22 @@
 
 /**
  * @brief 消息类型
- * 
- * @tparam MsgType 
+ *
+ * @tparam MsgType
  */
 template <typename MsgType>
-class Subscriber : public rclcpp::Node {
+class RoSSubscriber : public rclcpp::Node {
    public:
-	Subscriber(const std::string topicName)
+	RoSSubscriber(const std::string topicName, rclcpp::QoS qos = 10)
 		: rclcpp::Node("Subscriber"), topicName_(topicName) {
 		subscription_ = this->create_subscription<MsgType>(
-			topicName, 10,
-			std::bind(&Subscriber::topicCallback, this, std::placeholders::_1));
+			topicName, qos,
+			std::bind(&RoSSubscriber::topicCallback, this,
+					  std::placeholders::_1));
 	}
 
-   private:
-	void topicCallback(const typename MsgType::SharedPtr msg) const {
-        
-    }
+   protected:
+	virtual void topicCallback(const typename MsgType::SharedPtr msg) = 0;
 
 	const std::string topicName_;
 

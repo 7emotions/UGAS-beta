@@ -1,28 +1,34 @@
 #include <unistd.h>
 
-#include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/core/utility.hpp>
 #include <opencv2/highgui.hpp>
-#include <random>
-#include <vector>
-
-#include "ArmorDescriptor/ArmorDescriptor.h"
-#include "Detector/Detector.h"
-#include "HikCamera/HikCamera.h"
-#include "PanTiltUtil/PanTilt.h"
-#include "Parameters/Parameters.h"
-#include "Trajectory/Trajectory.h"
+#include <rclcpp/rclcpp.hpp>
 
 #define _IGNORE_CODE_CONFIDENCE
 
-#define TRAJECTORY_DEBUG
+#define ROS2_DEBUG
+
+#ifdef ROS2_DEBUG
+
+#include "ROS2Util/PitchSubscriber.h"
+
+int main(int argc, char **args) {
+	rclcpp::init(argc, args);
+	PitchSubscriber pitchSubscriber;
+	rclcpp::spin(pitchSubscriber.make_shared("Launch"));
+	rclcpp::shutdown();
+	return 0;
+}
+
+#endif
 
 #ifdef TRAJECTORY_DEBUG
+
+#include <fstream>
+#include <random>
 
 int main() {
 	// 弹道静态参数
@@ -53,9 +59,7 @@ int main() {
 
 		trajectoryCalculator.solve(target, v, count, error);
 
-		
-
-		std::cout << "Target:" << i << "\tdone."<< std::endl;
+		std::cout << "Target:" << i << "\tdone." << std::endl;
 
 		fp << i << "," << count << "," << error << std::endl;
 	}
@@ -63,7 +67,19 @@ int main() {
 	return 0;
 }
 
-#else
+#endif
+
+#ifdef RELEASE
+#include <algorithm>
+#include <iostream>
+#include <vector>
+
+#include "ArmorDescriptor/ArmorDescriptor.h"
+#include "Detector/Detector.h"
+#include "HikCamera/HikCamera.h"
+#include "PanTiltUtil/PanTilt.h"
+#include "Parameters/Parameters.h"
+#include "Trajectory/Trajectory.h"
 
 int main() {
 	HikCamera camera;

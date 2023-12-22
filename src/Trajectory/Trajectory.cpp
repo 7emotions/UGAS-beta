@@ -44,3 +44,25 @@ cv::Point3d Trajectory::solve(cv::Point3d pos, double v, size_t &count,
 
 	return cv::Point3d(pos.x, pos.y, tmp);
 }
+
+
+cv::Point3d Trajectory::solve(cv::Point3d pos, double v) {
+	auto dpos = _cameraOffset + pos;
+	cv::Point2d projPos;
+
+	projectTransform(dpos, projPos);
+
+	auto error = 0.0;
+	auto pitch = error;
+	auto tmp = projPos.y;
+	auto i = 0;
+
+	do {
+		tmp = tmp - error;
+		pitch = atan(tmp / projPos.x);
+		errorCalculate(error, projPos, v, pitch);
+		i++;
+	} while (fabs(error) > 1e-6 && i < 30);
+
+	return cv::Point3d(pos.x, pos.y, tmp);
+}

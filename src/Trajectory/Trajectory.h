@@ -27,7 +27,7 @@ class Trajectory {
 		: _cameraOffset(position), _gunpointOffset(offset) {}
 
 	/**
-	 * @brief 弹道解算
+	 * @brief 弹道解算，用于测试
 	 *
 	 * @param pos 目标
 	 * @param v 初速度
@@ -36,6 +36,15 @@ class Trajectory {
 	 * @return cv::Point3d 补偿点
 	 */
 	cv::Point3d solve(cv::Point3d pos, double v, size_t &count, double &err);
+
+	/**
+	 * @brief 弹道解算
+	 * 
+	 * @param pos 目标坐标
+	 * @param v 子弹初速度
+	 * @return cv::Point3d 补偿目标点
+	 */
+	cv::Point3d solve(cv::Point3d pos, double v);
 
    protected:
 	/**
@@ -53,4 +62,5 @@ class Trajectory {
 
 	cv::Point3d _cameraOffset;
 	float _gunpointOffset;
+	
 };

@@ -18,7 +18,7 @@
 
 class PitchSubscriber : public RoSSubscriber<std_msgs::msg::Float32> {
    public:
-	PitchSubscriber() : RoSSubscriber<std_msgs::msg::Float32>("Pitch") {
+	PitchSubscriber() : RoSSubscriber<std_msgs::msg::Float32>("/Launch/Pitch") {
 		std::cout << "Subscribed to Topic Pitch" << std::endl;
 	}
 

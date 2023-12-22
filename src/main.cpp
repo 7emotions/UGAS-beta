@@ -7,6 +7,7 @@
 #include <opencv2/highgui.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+// 忽略数字神经网络致信度（神经网络模型需更新）
 #define _IGNORE_CODE_CONFIDENCE
 
 #define ROS2_DEBUG
@@ -17,8 +18,7 @@
 
 int main(int argc, char **args) {
 	rclcpp::init(argc, args);
-	PitchSubscriber pitchSubscriber;
-	rclcpp::spin(pitchSubscriber.make_shared("Launch"));
+	rclcpp::spin(std::make_shared<PitchSubscriber>());
 	rclcpp::shutdown();
 	return 0;
 }
@@ -104,8 +104,6 @@ int main() {
 		if (img.empty()) {
 			std::cout << "Empty image." << std::endl;
 			return 1;
-			std::cout << "Empty image." << std::endl;
-			return 1;
 		}
 
 		detector.DetectArmors(img, tag, armors);
@@ -123,6 +121,8 @@ int main() {
 				  });
 
 		auto v = 30.0;
+		std::cout << "Aim to armor [" << armors[0].getCode() << "]"
+				  << std::endl;
 		pan.aim(trajectoryCalculator.solve(armors[0].get3DPoint(), v));
 
 		usleep(1000 * 10);

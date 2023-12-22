@@ -42,9 +42,10 @@ class Trajectory {
 	 * 
 	 * @param pos 目标坐标
 	 * @param v 子弹初速度
+	 * @param pitch_ 初始pitch角，用于回归绝对参考系
 	 * @return cv::Point3d 补偿目标点
 	 */
-	cv::Point3d solve(cv::Point3d pos, double v);
+	cv::Point3d solve(cv::Point3d pos, double v, double pitch_);
 
    protected:
 	/**
@@ -58,7 +59,15 @@ class Trajectory {
 	void errorCalculate(double &error, cv::Point2d pos, double v, double pitch);
 
    private:
-	void projectTransform(cv::Point3d &org, cv::Point2d &dst);
+	/**
+	 * @brief 投影变换
+	 * 
+	 * @param org 
+	 * @param dst 
+	 */
+	void projectTransform(const cv::Point3d &org, cv::Point2d &dst);
+
+	void rotateTransform(const cv::Point2d &org, cv::Point2d &dst, double pitch);
 
 	cv::Point3d _cameraOffset;
 	float _gunpointOffset;

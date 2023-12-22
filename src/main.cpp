@@ -10,7 +10,7 @@
 // 忽略数字神经网络致信度（神经网络模型需更新）
 #define _IGNORE_CODE_CONFIDENCE
 
-#define ROS2_DEBUG
+#define RELEASE
 
 #ifdef ROS2_DEBUG
 
@@ -123,7 +123,7 @@ int main() {
 		auto v = 30.0;
 		std::cout << "Aim to armor [" << armors[0].getCode() << "]"
 				  << std::endl;
-		pan.aim(trajectoryCalculator.solve(armors[0].get3DPoint(), v));
+		pan.aim(trajectoryCalculator.solve(armors[0].get3DPoint(), v, 0));
 
 		usleep(1000 * 10);
 	}

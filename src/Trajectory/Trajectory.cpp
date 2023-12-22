@@ -14,11 +14,20 @@ void Trajectory::errorCalculate(double &error, cv::Point2d pos, double v,
 			pos.y;
 }
 
-void Trajectory::projectTransform(cv::Point3d &org, cv::Point2d &dst) {
+void Trajectory::projectTransform(const cv::Point3d &org, cv::Point2d &dst) {
 	auto s = EuDis(cv::Point2d(org.x, org.y));
-	dst.x = s + _gunpointOffset;
+	dst.x = s - _gunpointOffset;
 	dst.y = org.z;
 }
+
+void Trajectory::rotateTransform(const cv::Point2d &org, cv::Point2d &dst, double pitch) {
+	auto s = EuDis(cv::Point2d(org.x, org.y));
+	auto alpha = std::atan(org.x / org.y);
+	auto beta = alpha - pitch;
+	dst.x = s * std::cos(beta);
+	dst.y = s * std::sin(beta);
+}
+
 
 cv::Point3d Trajectory::solve(cv::Point3d pos, double v, size_t &count,
 							  double &err) {
@@ -45,12 +54,12 @@ cv::Point3d Trajectory::solve(cv::Point3d pos, double v, size_t &count,
 	return cv::Point3d(pos.x, pos.y, tmp);
 }
 
-
-cv::Point3d Trajectory::solve(cv::Point3d pos, double v) {
+cv::Point3d Trajectory::solve(cv::Point3d pos, double v, double pitch_) {
 	auto dpos = _cameraOffset + pos;
 	cv::Point2d projPos;
 
 	projectTransform(dpos, projPos);
+	rotateTransform(projPos, projPos, pitch_);
 
 	auto error = 0.0;
 	auto pitch = error;

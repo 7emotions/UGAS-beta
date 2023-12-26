@@ -28,6 +28,8 @@ class PanTiltUtil {
 		sender.send();
 	}
 
+	void solve(cv::Point3d pos, float &pitch, float &yaw);
+
    private:
 	SerialUtil sender;
 	PnPSolver solver;

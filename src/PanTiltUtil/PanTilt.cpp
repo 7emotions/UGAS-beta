@@ -8,8 +8,8 @@ void PanTiltUtil::aim(ArmorDescriptor armor) {
 }
 
 void PanTiltUtil::aim(cv::Point3d pos){
-	auto yaw = -atanf(-pos.y / pos.x) * 180.0 / CV_PI;
-	auto pitch = -atanf(pos.z / pos.x) * 180.0 / CV_PI;
+	float pitch, yaw;
+	solve(pos, pitch, yaw);
 	aim(yaw,pitch);
 }
 
@@ -19,4 +19,9 @@ void PanTiltUtil::aim(float yaw, float pitch){
 	sender.pack(yaw, pitch, 0, 0, 0);
 	sender.send();
 
+}
+
+void PanTiltUtil::solve(cv::Point3d pos, float &pitch, float &yaw){
+	yaw = -atanf(-pos.y / pos.x) * 180.0 / CV_PI;
+	pitch = -atanf(pos.z / pos.x) * 180.0 / CV_PI;
 }

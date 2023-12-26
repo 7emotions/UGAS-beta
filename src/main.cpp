@@ -10,15 +10,15 @@
 // 忽略数字神经网络致信度（神经网络模型需更新）
 #define _IGNORE_CODE_CONFIDENCE
 
-#define RELEASE
+#define ROS2_DEBUG
 
 #ifdef ROS2_DEBUG
 
-#include "ROS2Util/PitchSubscriber.h"
+#include "ROS2Util/PkgSubscriber.h"
 
 int main(int argc, char **args) {
 	rclcpp::init(argc, args);
-	rclcpp::spin(std::make_shared<PitchSubscriber>());
+	rclcpp::spin(std::make_shared<PkgSubscriber>());
 	rclcpp::shutdown();
 	return 0;
 }

@@ -21,7 +21,7 @@ class PnPSolver {
 	~PnPSolver() = default;
 
 	/**
-	 * @brief PnP解算，根据armor的pts（2D）得到旋转矩阵rot与平移矩阵t
+	 * @brief PnP解算，根据armor的pts（2D）得到旋转矩阵rot与平移矩阵t，单位：米（m）
 	 *
 	 * @param armor 装甲板对象
 	 * @param rot 刚体旋转变换矩阵

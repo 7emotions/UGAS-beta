@@ -25,7 +25,7 @@ class PkgSubscriber : public RoSSubscriber<std_msgs::msg::Float32MultiArray> {
    public:
 	PkgSubscriber()
 		: RoSSubscriber<std_msgs::msg::Float32MultiArray>("/Launch/pkg") {
-		std::cout << "Subscribed to Topic Pitch" << std::endl;
+		std::cout << "Subscribed to Topic Pkg" << std::endl;
 	}
 
    private:

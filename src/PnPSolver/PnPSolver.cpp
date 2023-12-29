@@ -19,4 +19,7 @@ void PnPSolver::solve(ArmorDescriptor armor, cv::Mat &rot, cv::Mat &trans) {
 	cv::solvePnP(object, armor.getPoints(), param::CameraMatrix6,
 				 param::CameraDistCoeffs6, rot, trans, false,
 				 cv::SOLVEPNP_IPPE);
+	
+	// mm -> m
+	trans /= 1000;
 }
